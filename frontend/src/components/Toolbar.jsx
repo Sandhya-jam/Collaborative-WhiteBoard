@@ -1,49 +1,83 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil,faSlash,faSquare,faCircle} from '@fortawesome/free-solid-svg-icons'
+import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash} from '@fortawesome/free-solid-svg-icons'
+import Tooltip from './tooltip';
 
-const Toolbar = ({color,setColor,brushSize,setBrushSize,clearCanvas,tool,setTool}) => {
-    
+const Toolbar = ({color,setColor,brushSize,setBrushSize,
+  clearCanvas,tool,setTool,darkMode,setDarkMode,undo,redo}) => {
+    const baseBtn="relative overflow-hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90";
+    const active="bg-blue-500 text-white shadow-md scale-105";
+    const inactive="bg-white text-gray-700 hover:bg-gray-200 hover:scale-105";
+
   return (
-    <div className="flex gap-4 p-3 bg-gray-100 border-b items-center">
-         <button className="px-3 py-1 bg-white border" onClick={()=>setTool("pencil")}
-            title='Pencil'>
-                <FontAwesomeIcon icon={faPencil} />
-          </button>
-        <button className="px-3 py-1 bg-white border" onClick={()=>setTool("line")}>
-        Line
-        </button>
-        <button className="px-3 py-1 bg-white border" onClick={()=>setTool("rectangle")}>
-        Rectangle
-        </button>
-        <button className="px-3 py-1 bg-white border" onClick={()=>setTool("circle")}>
-        Circle
-        </button>
-
-        <div>
-            <label className="mr-2">Color</label>
-            <input
-            type='color'
-            value={color}
-            onChange={(e)=>setColor(e.target.value)}
-            />
-        </div>
-        <div>
-            <label className="mr-2">Brush Size</label>
-            <input
-            type='range'
-            min="1"
-            max="10"
-            value={brushSize}
-            onChange={(e)=>setBrushSize(e.target.value)}
-            />
-        </div>
+    <div className="fixed top-4 left-1/2 transform-translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-white shadow-lg rounded-xl border">
+      {/* Pencil */}
+      <Tooltip text="Pencil (P)">
         <button
-        onClick={clearCanvas}
-        className='bg-red-500 text-white px-4 py-1 rounded'>
-          Clear Board
+          onClick={(e)=>setTool("pencil")}
+          title='Pencil'
+          className={`${baseBtn} ${tool==="pencil"?active:inactive}`}>
+          <FontAwesomeIcon icon={faPencil}/>
         </button>
+      </Tooltip>
+      {/* Line */}
+      <button
+      onClick={()=>setTool("line")}
+      title='Line'
+      className={`${baseBtn} ${tool==="line"?active:inactive}`}>
+        <FontAwesomeIcon icon={faSlash}/>
+      </button>
+      {/* Rectangle */}
+      <button
+      onClick={()=>setTool("rectangle")}
+      title='Rectangle'
+      className={`${baseBtn} ${tool==="rectangle"?active:inactive}`}>
+        <FontAwesomeIcon icon={faSquare}/>
+      </button>
+      {/* Circle */}
+      <button
+      onClick={()=>setTool("circle")}
+      title='Circle'
+      className={`${baseBtn} ${tool==="circle"?active:inactive}`}>
+        <FontAwesomeIcon icon={faCircle}/>
+      </button>
+      {/* Divider */}
+      <div className="w-px h-6 bg-gray-300"></div>
+      {/* Color Picker */}
+      <input 
+        type="color" 
+        value={color}
+        onChange={(e)=>setColor(e.target.value)}
+        className='w-10 h-10 border rounded cursor-pointer'
+        title='Pick Color'/>
+      {/* Brush Size */}
+      <input 
+      type="range"
+      min="1"
+      max="10"
+      value={brushSize}
+      onChange={(e)=>setBrushSize(e.target.value)}
+      className='cursor-pointer'
+      title='Brush Size' 
+      />
+      {/* Clear */}
+      <button
+        onClick={clearCanvas}
+        title='Clear Board'
+        className={`${baseBtn} bg-red-500 text-white hover:bg-red-600`}
+        >
+         <FontAwesomeIcon icon={faTrash}/>
+      </button>
+      {/* Toggle node */}
+      <button
+      onClick={()=>setDarkMode((prev)=>!prev)}
+      className='w-10 h-10 rounded-lg bg-gary-800 text-white dark:bg-yellow-600 dark:text-black transition-all'
+      title='Toggle Theme'>
+         {darkMode?"☀️":"🌙"}
+      </button>
+      <button onClick={undo}>Undo</button>
+      <button onClick={redo}>Redo</button>
     </div>
-  )
+  ); 
 }
 
 export default Toolbar
