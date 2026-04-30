@@ -27,7 +27,7 @@ export default function useHistory(){
         });
     };
 
-    const clear=()=>{
+    const clearCanvas=()=>{
         if(actions.length==0) return;
 
         if(confirm("Clear the board??")){
@@ -36,5 +36,5 @@ export default function useHistory(){
         }
     };
 
-  return{actions,addAction,undo,redo,clear}
+  return{actions,addAction,undo,redo,clearCanvas}
 }

@@ -6,13 +6,12 @@ import { drawAll } from '../utils/drawUtils'
 
 const CanvaBoard = ({darkMode,setDarkMode}) => {
     const canvasRef=useRef(null)
-    const {actions,addAction,undo,redo,clear}=useHistory();
+    const {actions,addAction,undo,redo,clearCanvas}=useHistory();
     const [color,setColor]=useState("#000000")
     const [brushSize,setBrushSize]=useState(3)
 
-    const {startDrawing,draw,startDrawing,currentPath}=useCanvas(addAction,color,brushSize);
-
     const [tool,setTool]=useState("pencil")
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool);
 
     useEffect(()=>{
         const canvas=canvasRef.current;
@@ -48,10 +47,10 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
             break;
         }
     };
-    drawAll(ctx,actions,currentPath,color,brushSize);
+    drawAll(ctx,actions,currentPath,preview,color,brushSize);
     window.addEventListener("keydown",handleKey);
     return ()=>window.removeEventListener("keydown",handleKey);
-    },[darkMode,actions,currentPath]);
+    },[darkMode,actions,currentPath,preview]);
 
   return (
     <div>
