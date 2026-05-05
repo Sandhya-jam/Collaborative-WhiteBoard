@@ -36,13 +36,13 @@ export const drawAction = (ctx, action) => {
     }
 };
 
-export const drawAll = (ctx,actions,currentPath,preview,color,brushSize) => {
+export const drawAll = (ctx,actions,currentPath,preview,color,brushSize,remotePaths) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     actions.forEach((action) => {
         drawAction(ctx, action);
     });
-
+    
     // draw current path (live preview)
     if (currentPath.length > 0) {
         drawAction(ctx, {
@@ -56,4 +56,13 @@ export const drawAll = (ctx,actions,currentPath,preview,color,brushSize) => {
     if(preview){
         drawAction(ctx,preview);
     }
+
+    Object.values(remotePaths).forEach((path) => {
+    drawAction(ctx, {
+        type: "pencil",
+        points: path.points,
+        color: path.color,
+        width: path.width
+    });
+    });
 };

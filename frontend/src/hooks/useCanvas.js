@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function useCanvas(addAction,color,brushSize,tool){
+export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -12,7 +12,15 @@ export default function useCanvas(addAction,color,brushSize,tool){
         
         setDrawing(true);
         if(tool==="pencil"){
-            setCurrentPath([{x,y}]);
+            const point={x,y};
+            setCurrentPath([point]);
+            if (!socketRef?.current) return;
+            socketRef.current.emit("draw-start", {
+            id: socketRef.current.id,
+            point,
+            color,
+            width: brushSize
+            });
         }else{
             setStart({x,y});
         }
@@ -20,12 +28,19 @@ export default function useCanvas(addAction,color,brushSize,tool){
 
     const draw=(e)=>{
         if(!drawing) return;
-
+        
+        console.log("drawing:", drawing);
         const x=e.nativeEvent.offsetX;
         const y=e.nativeEvent.offsetY;
 
         if(tool==='pencil'){
-            setCurrentPath((prev)=>[...prev,{x,y}]);
+            const point={x,y}
+            setCurrentPath((prev)=>[...prev,point]);
+            if (!socketRef?.current) return;
+            socketRef.current.emit("draw-move", {
+                id: socketRef.current.id,
+                point
+            });
         }else if(start){
             //live preview
             if(tool==="line"){
@@ -73,21 +88,37 @@ export default function useCanvas(addAction,color,brushSize,tool){
 
     const stopDrawing = () => {
         if (!drawing) return;
-
+        
+        setDrawing(false);
+        console.log("Stop drawing triggered")
+        let action=null
         if(tool==="pencil"){
             addAction({
             type: "pencil",
             points: currentPath,
             color,
-            width: brushSize
+            width: brushSize,
+            userId:socketRef.current.id
         });
-           setCurrentPath([]);
+        if (!socketRef?.current) return;
+        socketRef.current.emit("draw-end", {
+            id: socketRef.current.id
+        });
         }else if(preview){
-            addAction(preview);
-            setPreview(null);
+            action={
+                ...preview,
+                userId:socketRef.current.id
+            };
         }
+
+        if(action){
+            addAction(preview);//local update
+            //console.log("Sending action:", action)
+            sendAction(action);//send to server
+        }
+        setCurrentPath([]);
+        setPreview(null);
         setStart(null);
-        setDrawing(false);
   };
   return {startDrawing,draw,stopDrawing,currentPath,preview};
 }

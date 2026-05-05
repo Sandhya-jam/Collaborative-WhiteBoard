@@ -3,15 +3,37 @@ import Toolbar from './Toolbar'
 import useHistory from '../hooks/useHistory'
 import useCanvas from '../hooks/useCanvas'
 import { drawAll } from '../utils/drawUtils'
+import useSocket from '../hooks/useSocket'
 
 const CanvaBoard = ({darkMode,setDarkMode}) => {
     const canvasRef=useRef(null)
-    const {actions,addAction,undo,redo,clearCanvas}=useHistory();
     const [color,setColor]=useState("#000000")
     const [brushSize,setBrushSize]=useState(3)
+    const [remotePaths,setRemotePaths]=useState({});
 
     const [tool,setTool]=useState("pencil")
-    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool);
+    const {actions,addAction,undo,redo,clearCanvas}=useHistory();
+    const {socketRef,sendAction}=useSocket(addAction,setRemotePaths,undo,redo);
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
+
+    const handleUndo=()=>{
+        if(!socketRef.current) return;
+
+        const userId=socketRef.current.id;
+        undo(userId);
+
+        socketRef.current.emit("undo",{userId});
+    };
+
+    const handleRedo = () => {
+        if (!socketRef?.current) return;
+
+        const userId = socketRef.current.id;
+
+        redo(userId);
+
+        socketRef.current.emit("redo", { userId });
+    };
 
     useEffect(()=>{
         const canvas=canvasRef.current;
@@ -47,10 +69,10 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
             break;
         }
     };
-    drawAll(ctx,actions,currentPath,preview,color,brushSize);
+    drawAll(ctx,actions,currentPath,preview,color,brushSize,remotePaths);
     window.addEventListener("keydown",handleKey);
     return ()=>window.removeEventListener("keydown",handleKey);
-    },[darkMode,actions,currentPath,preview]);
+    },[darkMode,actions,currentPath,preview,remotePaths]);
 
   return (
     <div>
@@ -64,8 +86,8 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
         setTool={setTool}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        undo={undo}
-        redo={redo}
+        undo={handleUndo}
+        redo={handleRedo}
         />
         <canvas
         ref={canvasRef}
@@ -73,7 +95,7 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
-        // onMouseLeave={stopDrawing}
+        onMouseLeave={stopDrawing}
         />
     </div>
   );

@@ -9,24 +9,28 @@ export default function useHistory(){
         setRedoStack([]);
     }
 
-    const undo=()=>{
+    const undo=(userId)=>{
         setActions((prev)=>{
-            if(prev.length===0) return prev;
-            const last=prev[prev.length-1];
-            setRedoStack((r)=>[...r,last])
-            return prev.slice(0,-1);
+            for(let i=prev.length-1;i>=0;i--){
+                if(prev[i].userId===userId){
+                    const newActions=[...prev];
+                    const removed=newActions.splice(i,1)[0];
+
+                    setRedoStack(r=>[...r,removed]);
+
+                    return newActions;
+                }
+            }
+            return prev;
         });
     };
-
+    
     const redo=()=>{
         setRedoStack((prev)=>{
-            if(prev.length===0) return prev;
-            const last=prev[prev.length-1];
-            setActions((a)=>[...a,last])
-            return prev.slice(0,-1);
+            
         });
     };
-
+    
     const clearCanvas=()=>{
         if(actions.length==0) return;
 
