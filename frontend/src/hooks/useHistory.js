@@ -68,5 +68,5 @@ export default function useHistory(){
         });
     };
 
-  return{actions,addAction,undo,redo,clearCanvas}
+  return{actions,setActions,addAction,undo,redo,clearCanvas}
 }

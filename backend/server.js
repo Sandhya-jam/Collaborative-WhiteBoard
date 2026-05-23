@@ -3,6 +3,9 @@ import http from "http"
 import {Server} from "socket.io"
 import cors from "cors"
 import dotenv from "dotenv"
+import { registerDrawingHandlers } from "./socket/drawingHandlers.js"
+import { registerHistoryHandlers } from "./socket/historyHandlers.js"
+import { registerRoomHandlers } from "./socket/roomHandlers.js"
 
 const app=express();
 app.use(cors());
@@ -17,44 +20,14 @@ const io=new Server(server,{
 });
 //Why CORS here too?
 //Socket.IO also needs permission for cross-origin connections.
-
+const rooms={};
 io.on("connection",(socket)=>{
     console.log("User connected: ",socket.id);
     
-    socket.on("draw-action", (action) => {
-        //console.log("Received on server:", action);
-        socket.to(socket.roomId).emit("draw-action", action);
-    });
-    socket.on("draw-start",(data)=>{
-        socket.to(socket.roomId).emit("draw-start",data);
-    });
+    registerDrawingHandlers(socket);
+    registerHistoryHandlers(socket);
+    registerRoomHandlers(socket);
 
-    socket.on("draw-move",(data)=>{
-        socket.to(socket.roomId).emit("draw-move",data);
-    });
-
-    socket.on("draw-end",(data)=>{
-        socket.to(socket.roomId).emit("draw-end",data);
-    });
-    
-    socket.on("undo",(data)=>{
-        console.log("undo received on server")
-        socket.to(socket.roomId).emit("undo",data);
-    })
-    
-    socket.on("redo",(data)=>{
-        socket.to(socket.roomId).emit("redo",data);
-    })
-
-    socket.on("clear-canvas",(data)=>{
-        console.log("SERVER GOT CLEAR",data.userId);
-        socket.to(socket.roomId).emit("clear-canvas",data);
-    })
-    socket.on("join-room",(roomId)=>{
-        socket.join(roomId);
-        socket.roomId=roomId;
-        console.log(`${socket.id} joined ${roomId}`);
-    })
     socket.on("disconnect",()=>{
         console.log("User disconnected:",socket.id);
     });

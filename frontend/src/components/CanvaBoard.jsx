@@ -12,8 +12,8 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [remotePaths,setRemotePaths]=useState({});
 
     const [tool,setTool]=useState("pencil")
-    const {actions,addAction,undo,redo,clearCanvas}=useHistory();
-    const {socketRef,sendAction}=useSocket(addAction,setRemotePaths,undo,redo,clearCanvas);
+    const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
+    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
 
     const handleUndo=()=>{
@@ -59,9 +59,6 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         ctx.lineWidth=3;
         ctx.lineCap="round";
         
-        if(roomId){
-            socketRef.current.emit("join-room",roomId);
-        }
         const handleKey = (e) => {
         switch (e.key.toLowerCase()) {
         case "p":
@@ -87,7 +84,13 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     window.addEventListener("keydown",handleKey);
     //console.log("ACTIONS:",actions);
     return ()=>window.removeEventListener("keydown",handleKey);
-    },[darkMode,actions,currentPath,preview,remotePaths,roomId]);
+    },[darkMode,actions,currentPath,preview,remotePaths]);
+    
+    useEffect(()=>{
+        if(roomId && socketRef.current){
+            socketRef.current.emit("join-room",roomId);
+        }
+    },[roomId]);
 
   return (
     <div>

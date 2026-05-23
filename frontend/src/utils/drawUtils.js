@@ -1,4 +1,5 @@
 export const drawAction = (ctx, action) => {
+    if(!action) return;
     ctx.strokeStyle = action.color;
     ctx.lineWidth = action.strokewidth;
     ctx.lineCap = "round";
@@ -39,7 +40,7 @@ export const drawAction = (ctx, action) => {
 export const drawAll = (ctx,actions,currentPath,preview,color,brushSize,remotePaths) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
-    actions.forEach((action) => {
+    actions?.forEach((action) => {
         drawAction(ctx, action);
     });
     

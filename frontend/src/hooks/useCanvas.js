@@ -93,16 +93,18 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         console.log("Stop drawing triggered")
         let action=null
         if(tool==="pencil"){
-            addAction({
+        const pencilAction={
             type: "pencil",
             points: currentPath,
             color,
             width: brushSize,
             userId:socketRef.current.id
-        });
+        };
+        addAction(pencilAction);
         if (!socketRef?.current) return;
         socketRef.current.emit("draw-end", {
-            id: socketRef.current.id
+            id: socketRef.current.id,
+            action:pencilAction
         });
         }else if(preview){
             action={

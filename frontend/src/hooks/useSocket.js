@@ -1,7 +1,7 @@
 import { useEffect,useRef } from "react";
 import {socket} from "../socket"
 
-export default function useSocket(addAction,setRemotePaths,undo,redo,clearCanvas){
+export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas){
     const clearRef=useRef();
     console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
@@ -79,8 +79,7 @@ export default function useSocket(addAction,setRemotePaths,undo,redo,clearCanvas
                 return newPaths;
             });
         });
-        // console.log("UNDO LISTENERS:",
-        //     socket.listeners("undo").length);
+        
         socket.on("undo",handleUndo);
 
         socket.on("redo", ({ userId }) => {
@@ -92,6 +91,10 @@ export default function useSocket(addAction,setRemotePaths,undo,redo,clearCanvas
             clearRef.current?.(userId);
         });
 
+        socket.on("load-room",(actions)=>{
+            console.log("ROOM LOADED",actions);
+            setActions(actions);
+        })
         socket.on("disconnect", () => {
             console.log("DISCONNECTED");
         });
