@@ -13,15 +13,16 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
 
     const [tool,setTool]=useState("pencil")
     const {actions,addAction,undo,redo,clearCanvas}=useHistory();
-    const {socketRef,sendAction}=useSocket(addAction,setRemotePaths,undo,redo);
+    const {socketRef,sendAction}=useSocket(addAction,setRemotePaths,undo,redo,clearCanvas);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
 
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
         const userId=socketRef.current.id;
+        console.log("UNDO BUTTON CLICKED");
         undo(userId);
-
+        console.log("EMITTING UNDO");
         socketRef.current.emit("undo",{userId});
     };
 
@@ -29,10 +30,24 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
         if (!socketRef?.current) return;
 
         const userId = socketRef.current.id;
-
         redo(userId);
 
         socketRef.current.emit("redo", { userId });
+    };
+    
+    const handleClear=()=>{
+        if (!socketRef?.current) return;
+        const confirmed =
+        window.confirm(
+            "Clear your drawings?"
+        );
+        if (!confirmed) return;
+        const userId = socketRef.current.id;
+        
+        console.log("CLEAR CLICKED", userId);
+        clearCanvas(userId);
+        console.log("EMITTING CLEAR");
+        socketRef.current.emit("clear-canvas",{userId});
     };
 
     useEffect(()=>{
@@ -71,6 +86,7 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
     };
     drawAll(ctx,actions,currentPath,preview,color,brushSize,remotePaths);
     window.addEventListener("keydown",handleKey);
+    //console.log("ACTIONS:",actions);
     return ()=>window.removeEventListener("keydown",handleKey);
     },[darkMode,actions,currentPath,preview,remotePaths]);
 
@@ -81,7 +97,7 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
         setColor={setColor}
         brushSize={brushSize}
         setBrushSize={setBrushSize}
-        clearCanvas={clearCanvas}
+        clearCanvas={handleClear}
         tool={setTool}
         setTool={setTool}
         darkMode={darkMode}

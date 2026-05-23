@@ -1,21 +1,37 @@
 import { useEffect,useRef } from "react";
-import {io} from "socket.io-client"
+import {socket} from "../socket"
 
-export default function useSocket(addAction,setRemotePaths,undo,redo){
-    const socketRef=useRef(null)
-
+export default function useSocket(addAction,setRemotePaths,undo,redo,clearCanvas){
+    const clearRef=useRef();
+    console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
-        socketRef.current=io("http://localhost:5000");
-
-        socketRef.current.on("connect",()=>{
-            console.log("Connected: ",socketRef.current.id);
+        clearRef.current=clearCanvas;
+        console.log("USESOCKET EFFECT RUNNING");
+        console.log("ATTACHING DRAW-END LISTENER");
+        const handleUndo = ({ userId }) => {
+            console.log("UNDO RECEIVED ON CLIENT", userId);
+            undo(userId);
+        };
+        socket.off("connect");
+        socket.off("draw-action");
+        socket.off("draw-start");
+        socket.off("draw-move");
+        socket.off("draw-end");
+        socket.off("undo",handleUndo);
+        socket.off("redo");
+        socket.off("clear-canvas");
+        socket.off("disconnect");
+        socket.on("connect",()=>{
+            console.log("Connected: ",socket.id);
         });
 
-        socketRef.current.on("draw-action",(action)=>{
-            addAction(action);
+        socket.on("draw-action",(action)=>{
+            if(action.type!=="pencil"){
+                addAction(action);
+            }  
         })
         //START
-        socketRef.current.on("draw-start",({id,point,color,width})=>{
+        socket.on("draw-start",({id,point,color,width})=>{
             setRemotePaths((prev)=>({
                 ...prev,
                 [id]:{
@@ -27,7 +43,7 @@ export default function useSocket(addAction,setRemotePaths,undo,redo){
         });
 
         //MOVE 
-        socketRef.current.on("draw-move",({id,point})=>{
+        socket.on("draw-move",({id,point})=>{
             setRemotePaths((prev)=>{
                 const path=prev[id];
                 if(!path) return prev;
@@ -43,7 +59,8 @@ export default function useSocket(addAction,setRemotePaths,undo,redo){
         });
 
         //END 
-        socketRef.current.on("draw-end",({id})=>{
+        socket.on("draw-end",({id})=>{
+            console.log("DRAW END RECEIVED FROM:", id);
             setRemotePaths((prev)=>{
                 const path=prev[id];
                 if(!path) return prev;
@@ -52,7 +69,8 @@ export default function useSocket(addAction,setRemotePaths,undo,redo){
                     type:"pencil",
                     points:path.points,
                     color:path.color,
-                    width:path.width
+                    width:path.width,
+                    userId:id
                 });
 
                 const newPaths={...prev};
@@ -61,23 +79,41 @@ export default function useSocket(addAction,setRemotePaths,undo,redo){
                 return newPaths;
             });
         });
+        // console.log("UNDO LISTENERS:",
+        //     socket.listeners("undo").length);
+        socket.on("undo",handleUndo);
 
-        socketRef.current.on("undo", ({ userId }) => {
-            console.log("UNDO RECEIVED ON CLIENT", userId);
-            undo(userId)
-        });
-
-        socketRef.current.on("redo", ({ userId }) => {
+        socket.on("redo", ({ userId }) => {
             redo(userId);
         });
+
+        socket.on("clear-canvas",({userId})=>{
+            console.log("CLEAR RECEIVED",userId);
+            clearRef.current?.(userId);
+        });
+
+        socket.on("disconnect", () => {
+            console.log("DISCONNECTED");
+        });
         return()=>{
-            socketRef.current.disconnect();
+            socket.off("connect");
+            socket.off("draw-action");
+            socket.off("draw-start");
+            socket.off("draw-move");
+            socket.off("draw-end");
+            socket.off("undo",handleUndo);
+            socket.off("redo");
+            socket.off("clear-canvas");
+            socket.off("disconnect");
         };
-    },[]);
+    },[clearCanvas]);
 
     const sendAction=(action)=>{
-        socketRef.current.emit("draw-action",action);
+        socket.emit("draw-action",action);
     };
 
-    return {socketRef,sendAction};
+    return {
+        socketRef: { current: socket },
+        sendAction
+  };
 }

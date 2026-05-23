@@ -39,13 +39,17 @@ io.on("connection",(socket)=>{
     
     socket.on("undo",(data)=>{
         console.log("undo received on server")
-        io.emit("undo",data);
+        socket.broadcast.emit("undo",data);
     })
     
     socket.on("redo",(data)=>{
         socket.broadcast.emit("redo",data);
     })
 
+    socket.on("clear-canvas",(data)=>{
+        console.log("SERVER GOT CLEAR",data.userId);
+        socket.broadcast.emit("clear-canvas",data);
+    })
     socket.on("disconnect",()=>{
         console.log("User disconnected:",socket.id);
     });

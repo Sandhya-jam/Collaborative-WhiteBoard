@@ -29,7 +29,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
     const draw=(e)=>{
         if(!drawing) return;
         
-        console.log("drawing:", drawing);
+        //console.log("drawing:", drawing);
         const x=e.nativeEvent.offsetX;
         const y=e.nativeEvent.offsetY;
 
@@ -112,7 +112,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         }
 
         if(action){
-            addAction(preview);//local update
+            addAction(action);//local update
             //console.log("Sending action:", action)
             sendAction(action);//send to server
         }
