@@ -23,32 +23,37 @@ io.on("connection",(socket)=>{
     
     socket.on("draw-action", (action) => {
         //console.log("Received on server:", action);
-        socket.broadcast.emit("draw-action", action);
+        socket.to(socket.roomId).emit("draw-action", action);
     });
     socket.on("draw-start",(data)=>{
-        socket.broadcast.emit("draw-start",data);
+        socket.to(socket.roomId).emit("draw-start",data);
     });
 
     socket.on("draw-move",(data)=>{
-        socket.broadcast.emit("draw-move",data);
+        socket.to(socket.roomId).emit("draw-move",data);
     });
 
     socket.on("draw-end",(data)=>{
-        socket.broadcast.emit("draw-end",data);
+        socket.to(socket.roomId).emit("draw-end",data);
     });
     
     socket.on("undo",(data)=>{
         console.log("undo received on server")
-        socket.broadcast.emit("undo",data);
+        socket.to(socket.roomId).emit("undo",data);
     })
     
     socket.on("redo",(data)=>{
-        socket.broadcast.emit("redo",data);
+        socket.to(socket.roomId).emit("redo",data);
     })
 
     socket.on("clear-canvas",(data)=>{
         console.log("SERVER GOT CLEAR",data.userId);
-        socket.broadcast.emit("clear-canvas",data);
+        socket.to(socket.roomId).emit("clear-canvas",data);
+    })
+    socket.on("join-room",(roomId)=>{
+        socket.join(roomId);
+        socket.roomId=roomId;
+        console.log(`${socket.id} joined ${roomId}`);
     })
     socket.on("disconnect",()=>{
         console.log("User disconnected:",socket.id);

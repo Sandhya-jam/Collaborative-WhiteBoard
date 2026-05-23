@@ -5,7 +5,7 @@ import useCanvas from '../hooks/useCanvas'
 import { drawAll } from '../utils/drawUtils'
 import useSocket from '../hooks/useSocket'
 
-const CanvaBoard = ({darkMode,setDarkMode}) => {
+const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const [color,setColor]=useState("#000000")
     const [brushSize,setBrushSize]=useState(3)
@@ -58,11 +58,10 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
         const ctx=canvas.getContext("2d");
         ctx.lineWidth=3;
         ctx.lineCap="round";
-
-        //clears canvas whenever the theme changed
-        // ctx.fillStyle = darkMode ? "#1f2937" : "#ffffff"; // dark gray / white
-        // ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+        
+        if(roomId){
+            socketRef.current.emit("join-room",roomId);
+        }
         const handleKey = (e) => {
         switch (e.key.toLowerCase()) {
         case "p":
@@ -88,7 +87,7 @@ const CanvaBoard = ({darkMode,setDarkMode}) => {
     window.addEventListener("keydown",handleKey);
     //console.log("ACTIONS:",actions);
     return ()=>window.removeEventListener("keydown",handleKey);
-    },[darkMode,actions,currentPath,preview,remotePaths]);
+    },[darkMode,actions,currentPath,preview,remotePaths,roomId]);
 
   return (
     <div>
