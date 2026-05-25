@@ -1,18 +1,19 @@
-import rooms from "../store/roomStore.js";
+import Room from "../models/Room.js";
 
 export function registerRoomHandlers(socket){
-    socket.on("join-room",(roomId)=>{
+    socket.on("join-room",async(roomId)=>{
         socket.join(roomId);
         socket.roomId=roomId;
-        console.log(`User ${socket.id} joined room ${roomId}`);
+        
+        let room=await Room.findOne({roomId});
         //create room if absent
-        if(!rooms[roomId]){
-            rooms[roomId]={
-                actions:[],
-                redoStack:[]
-            };
+        if(!room){
+            room=await Room.create({roomId,actions:[],redoStack:[]});
         }
+        
+        console.log(`User ${socket.id} joined room ${roomId}`);
+  
         //send old room state
-        socket.emit("load-room",rooms[roomId].actions);
+        socket.emit("load-room",room.actions);
     });
 }

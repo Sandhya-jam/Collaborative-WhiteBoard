@@ -3,6 +3,7 @@ import http from "http"
 import {Server} from "socket.io"
 import cors from "cors"
 import dotenv from "dotenv"
+import { connectDB } from "./config/db.js"
 import { registerDrawingHandlers } from "./socket/drawingHandlers.js"
 import { registerHistoryHandlers } from "./socket/historyHandlers.js"
 import { registerRoomHandlers } from "./socket/roomHandlers.js"
@@ -10,6 +11,7 @@ import { registerRoomHandlers } from "./socket/roomHandlers.js"
 const app=express();
 app.use(cors());
 
+dotenv.config();
 //app.use(express.json());
 const server=http.createServer(app);
 //Creates a WebSocket server & Attaches it to HTTP server
@@ -33,6 +35,7 @@ io.on("connection",(socket)=>{
     });
 });
 
+connectDB();
 const PORT=process.env.PORT||5000
 server.listen(PORT,()=>{
     console.log(`Server running on port ${PORT}`)

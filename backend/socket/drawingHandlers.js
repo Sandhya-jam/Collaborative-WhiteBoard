@@ -1,9 +1,11 @@
-import rooms from "../store/roomStore.js";
+import Room from "../models/Room.js";
 
 export function registerDrawingHandlers(socket){
-    socket.on("draw-action", (action) => {//for shapes
-        rooms[socket.roomId].actions?.push(action);
-        rooms[socket.roomId].redoStack=[]
+    socket.on("draw-action", async(action) => {//for shapes
+        const room=await Room.findOne({roomId:socket.roomId});
+        room.actions?.push(action);
+        room.redoStack=[]
+        await room.save();
         socket.to(socket.roomId).emit("draw-action", action);
     });
     socket.on("draw-start",(data)=>{
@@ -14,9 +16,11 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("draw-move",data);
     });
 
-    socket.on("draw-end",(data)=>{//for pencil
-        rooms[socket.roomId].actions?.push(data.action);
-        rooms[socket.roomId].redoStack=[]
+    socket.on("draw-end",async(data)=>{//for pencil
+        const room=await Room.findOne({roomId:socket.roomId});
+        room.actions?.push(data.action);
+        room.redoStack=[]
+        await room.save();
         socket.to(socket.roomId).emit("draw-end",data);
     });
 }
