@@ -42,6 +42,7 @@ io.on("connection",(socket)=>{
             if(users.size===0){
                 roomUsers.delete(roomId);
             }
+            socket.to(roomId).emit("cursor-remove",userId);
         }}
         console.log("User disconnected:",socket.id);
     });

@@ -29,4 +29,8 @@ export function registerRoomHandlers(socket,io){
         //send old room state
         socket.emit("load-room",room.actions);
     });
+
+    socket.on("cursor-move",({x,y,userId,color})=>{
+        socket.to(socket.roomId).emit("cursor-move",{x,y,userId,color});
+    });
 }

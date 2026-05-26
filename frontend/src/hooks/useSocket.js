@@ -1,7 +1,7 @@
 import { useEffect,useRef } from "react";
 import {socket} from "../socket"
 
-export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers){
+export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors){
     const clearRef=useRef();
     console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
@@ -101,6 +101,21 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             setUsers(users);
         })
         
+        socket.on("cursor-move",({userId,x,y,color})=>{
+            setRemoteCursors((prev)=>({
+                ...prev,
+                [userId]:{x,y,color}
+            }));
+        });
+        
+        socket.on("cursor-remove",(userId)=>{
+            setRemoteCursors(prev=>{
+                const newCursors={...prev};
+                delete newCursors[userId];
+                return newCursors;
+            });
+        });
+
         socket.on("disconnect", () => {
             console.log("DISCONNECTED");
         });
