@@ -1,11 +1,12 @@
 import { useState } from "react";
-
+import {getUserId} from "../utils/userId";
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
     const [preview,setPreview]=useState(null);
-
+    
+    const userId=getUserId();
     const startDrawing=(e)=>{
         const x=e.nativeEvent.offsetX;
         const y=e.nativeEvent.offsetY;
@@ -16,7 +17,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             setCurrentPath([point]);
             if (!socketRef?.current) return;
             socketRef.current.emit("draw-start", {
-            id: socketRef.current.id,
+            userId: userId,
             point,
             color,
             width: brushSize
@@ -38,7 +39,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             setCurrentPath((prev)=>[...prev,point]);
             if (!socketRef?.current) return;
             socketRef.current.emit("draw-move", {
-                id: socketRef.current.id,
+                userId: userId,
                 point
             });
         }else if(start){
@@ -98,18 +99,17 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             points: currentPath,
             color,
             width: brushSize,
-            userId:socketRef.current.id
+            userId:userId
         };
         addAction(pencilAction);
         if (!socketRef?.current) return;
         socketRef.current.emit("draw-end", {
-            id: socketRef.current.id,
             action:pencilAction
         });
         }else if(preview){
             action={
                 ...preview,
-                userId:socketRef.current.id
+                userId:userId
             };
         }
 

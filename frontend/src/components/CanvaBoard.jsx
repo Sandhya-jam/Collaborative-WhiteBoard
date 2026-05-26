@@ -4,22 +4,24 @@ import useHistory from '../hooks/useHistory'
 import useCanvas from '../hooks/useCanvas'
 import { drawAll } from '../utils/drawUtils'
 import useSocket from '../hooks/useSocket'
+import { getUserId } from '../utils/userId'
 
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const [color,setColor]=useState("#000000")
     const [brushSize,setBrushSize]=useState(3)
     const [remotePaths,setRemotePaths]=useState({});
-
+    const [users,setUsers]=useState([]);
     const [tool,setTool]=useState("pencil")
-    const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
-    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas);
-    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
 
+    const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
+    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers);
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
+    
+    const userId=getUserId();
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
-        const userId=socketRef.current.id;
         console.log("UNDO BUTTON CLICKED");
         undo(userId);
         console.log("EMITTING UNDO");
@@ -28,8 +30,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
 
     const handleRedo = () => {
         if (!socketRef?.current) return;
-
-        const userId = socketRef.current.id;
+        console.log("REDO BUTTON CLICKED");
         redo(userId);
 
         socketRef.current.emit("redo", { userId });
@@ -42,8 +43,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             "Clear your drawings?"
         );
         if (!confirmed) return;
-        const userId = socketRef.current.id;
-        
+
         console.log("CLEAR CLICKED", userId);
         clearCanvas(userId);
         console.log("EMITTING CLEAR");
@@ -86,14 +86,22 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     return ()=>window.removeEventListener("keydown",handleKey);
     },[darkMode,actions,currentPath,preview,remotePaths]);
     
-    useEffect(()=>{
+    useEffect(() => {
         if(roomId && socketRef.current){
-            socketRef.current.emit("join-room",roomId);
+            console.log("JOINING ROOM:",roomId);
+            socketRef.current.emit("join-room", { roomId, userId });
         }
-    },[roomId]);
 
+    }, [roomId]);
+    console.log(
+    "USERS STATE:",
+    users
+);
   return (
     <div>
+        <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-3 py-2 rounded shadow z-50">
+            {users?.length} user{users?.length !== 1 && "s"} in room
+        </div>
         <Toolbar
         color={color}
         setColor={setColor}

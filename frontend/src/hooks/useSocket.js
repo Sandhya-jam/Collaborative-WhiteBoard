@@ -1,7 +1,7 @@
 import { useEffect,useRef } from "react";
 import {socket} from "../socket"
 
-export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas){
+export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers){
     const clearRef=useRef();
     console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
@@ -92,9 +92,15 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
         });
 
         socket.on("load-room",(actions)=>{
-            console.log("ROOM LOADED",actions);
+            console.log("ROOM LOADED",actions.length);
             setActions(actions);
+        });
+
+        socket.on("users-update",(users)=>{
+            console.log("USERS UPDATE",users);
+            setUsers(users);
         })
+        
         socket.on("disconnect", () => {
             console.log("DISCONNECTED");
         });

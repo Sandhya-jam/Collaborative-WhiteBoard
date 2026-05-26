@@ -4,6 +4,7 @@ import {Server} from "socket.io"
 import cors from "cors"
 import dotenv from "dotenv"
 import { connectDB } from "./config/db.js"
+import {roomUsers} from "./store/presenceStore.js"
 import { registerDrawingHandlers } from "./socket/drawingHandlers.js"
 import { registerHistoryHandlers } from "./socket/historyHandlers.js"
 import { registerRoomHandlers } from "./socket/roomHandlers.js"
@@ -28,9 +29,20 @@ io.on("connection",(socket)=>{
     
     registerDrawingHandlers(socket);
     registerHistoryHandlers(socket);
-    registerRoomHandlers(socket);
+    registerRoomHandlers(socket,io);
 
     socket.on("disconnect",()=>{
+        const roomId=socket.roomId;
+        const userId=socket.userId;
+        if(roomId && roomUsers.has(roomId)){{
+            const users=roomUsers.get(roomId);
+            users.delete(userId);
+            io.to(roomId).emit("users-update",[...users]);
+
+            if(users.size===0){
+                roomUsers.delete(roomId);
+            }
+        }}
         console.log("User disconnected:",socket.id);
     });
 });
