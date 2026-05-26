@@ -1,7 +1,7 @@
 import { useEffect,useRef } from "react";
 import {socket} from "../socket"
 
-export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors){
+export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast){
     const clearRef=useRef();
     console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
@@ -20,6 +20,8 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
         socket.off("undo",handleUndo);
         socket.off("redo");
         socket.off("clear-canvas");
+        socket.off("user-joined");
+        socket.off("user-left");
         socket.off("disconnect");
         socket.on("connect",()=>{
             console.log("Connected: ",socket.id);
@@ -115,6 +117,14 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
                 return newCursors;
             });
         });
+        
+        socket.on("user-joined",(userId)=>{
+            addToast(`${userId.slice(0,5)} joined`,"join");
+        });
+
+        socket.on("user-left",(userId)=>{
+            addToast(`${userId.slice(0,5)} left`,"leave");
+        });
 
         socket.on("disconnect", () => {
             console.log("DISCONNECTED");
@@ -128,6 +138,8 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             socket.off("undo",handleUndo);
             socket.off("redo");
             socket.off("clear-canvas");
+            socket.off("user-joined");
+            socket.off("user-left");
             socket.off("disconnect");
         };
     },[clearCanvas]);

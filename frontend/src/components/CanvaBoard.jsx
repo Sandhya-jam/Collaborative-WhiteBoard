@@ -7,6 +7,8 @@ import useSocket from '../hooks/useSocket'
 import { getUserId } from '../utils/userId'
 import RemoteCursors from './RemoteCursors'
 import useCursor from '../hooks/useCursor'
+import useToast from '../hooks/useToast'
+import Toasts from './Toasts'
 
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
@@ -16,13 +18,14 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [users,setUsers]=useState([]);
     const [tool,setTool]=useState("pencil")
     const [remoteCursors,setRemoteCursors]=useState({});
-
+    
+    const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
-    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors);
+    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
     const {sendCursor}=useCursor(socketRef,getUserId());
-
     const userId=getUserId();
+
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
@@ -131,6 +134,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         onMouseLeave={stopDrawing}
         />
         <RemoteCursors remoteCursors={remoteCursors} />
+        <Toasts toasts={toasts} />
     </div>
   );
 }

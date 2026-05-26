@@ -13,6 +13,7 @@ export function registerRoomHandlers(socket,io){
         const users=roomUsers.get(roomId);
         users.add(socket.userId);
 
+        socket.to(roomId).emit("user-joined",userId);
         io.to(roomId).emit("users-update",[...users]);
         console.log("EMITTING USERS:",[...users]);
         let room=await Room.findOne({roomId});

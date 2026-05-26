@@ -37,6 +37,7 @@ io.on("connection",(socket)=>{
         if(roomId && roomUsers.has(roomId)){{
             const users=roomUsers.get(roomId);
             users.delete(userId);
+            socket.to(roomId).emit("user-left",userId);
             io.to(roomId).emit("users-update",[...users]);
 
             if(users.size===0){
