@@ -3,13 +3,13 @@ import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash} from '@for
 import Tooltip from './tooltip';
 
 const Toolbar = ({color,setColor,brushSize,setBrushSize,
-  clearCanvas,tool,setTool,darkMode,setDarkMode,undo,redo}) => {
+  clearCanvas,tool,setTool,darkMode,setDarkMode,undo,redo,exportPNG}) => {
     const baseBtn="relative overflow-hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90";
     const active="bg-blue-500 text-white shadow-md scale-105";
     const inactive="bg-white text-gray-700 hover:bg-gray-200 hover:scale-105";
 
   return (
-    <div className="fixed top-4 left-1/2 transform-translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-white shadow-lg rounded-xl border">
+    <div className="fixed top-4 left-1/4 transform-translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-white shadow-lg rounded-xl border">
       {/* Pencil */}
       <Tooltip text="Pencil (P)">
         <button
@@ -76,6 +76,10 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,
       </button>
       <button onClick={undo}>Undo</button>
       <button onClick={redo}>Redo</button>
+      {/* Export PNG */}
+      <button onClick={exportPNG}
+      className="px-3 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-all"
+      >Export PNG</button>
     </div>
   ); 
 }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export default function useHistory(){
     const [actions,setActions]=useState([]);
@@ -9,7 +9,7 @@ export default function useHistory(){
         setRedoStack([]);
     }
 
-    const undo=(userId)=>{
+    const undo=useCallback((userId)=>{
         console.log("UNDO CALLED ON CLIENT:", userId);
         setActions((prev)=>{
             console.log("BEFORE:", prev);
@@ -20,16 +20,16 @@ export default function useHistory(){
                     const removed=newActions.splice(i,1)[0];
 
                     setRedoStack(r=>[...r,removed]);
-                    //console.log("AFTER:", newActions);
+                    console.log("AFTER:", newActions);
                     return newActions;
                 }
             }
             //console.log("NO MATCH FOUND ❌");
             return prev;
         });
-    };
+    },[]);
     
-    const redo=(userId)=>{
+    const redo=useCallback((userId)=>{
         setRedoStack((prev)=>{
             if(prev.length===0) return prev;
 
@@ -44,11 +44,11 @@ export default function useHistory(){
             }
             return prev;
         });
-    };
+    },[]);
     
-    const clearCanvas=(userId)=>{
+    const clearCanvas=useCallback((userId)=>{
         console.log("CLEAR FN CALLED");
-        if(actions.length==0) return;
+        // if(actions.length==0) return;
     
         setActions(prev => {
             console.log("BEFORE CLEAR:", prev);
@@ -66,7 +66,7 @@ export default function useHistory(){
 
             return filtered;
         });
-    };
+    },[]);
 
   return{actions,setActions,addAction,undo,redo,clearCanvas}
 }

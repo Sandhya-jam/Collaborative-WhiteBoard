@@ -7,9 +7,10 @@ import useSocket from '../hooks/useSocket'
 import { getUserId } from '../utils/userId'
 import RemoteCursors from './RemoteCursors'
 import useCursor from '../hooks/useCursor'
+import Users from './Users'
 import useToast from '../hooks/useToast'
 import Toasts from './Toasts'
-
+import useExport from '../hooks/useExport'
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const [color,setColor]=useState("#000000")
@@ -19,6 +20,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [tool,setTool]=useState("pencil")
     const [remoteCursors,setRemoteCursors]=useState({});
     
+    const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast);
@@ -100,15 +102,10 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         }
 
     }, [roomId]);
-    console.log(
-    "USERS STATE:",
-    users
-);
+    
   return (
     <div>
-        <div className="absolute top-4 right-4 bg-white dark:bg-gray-800 px-3 py-2 rounded shadow z-50">
-            {users?.length} user{users?.length !== 1 && "s"} in room
-        </div>
+        <Users users={users}/>
         <Toolbar
         color={color}
         setColor={setColor}
@@ -121,6 +118,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         setDarkMode={setDarkMode}
         undo={handleUndo}
         redo={handleRedo}
+        exportPNG={exportPNG}
         />
         <canvas
         ref={canvasRef}

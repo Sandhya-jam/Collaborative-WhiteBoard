@@ -103,6 +103,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         };
         addAction(pencilAction);
         if (!socketRef?.current) return;
+        console.log("DRAW END",pencilAction);
         socketRef.current.emit("draw-end", {
             action:pencilAction
         });
