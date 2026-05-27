@@ -9,31 +9,17 @@ const RemoteCursors = ({remoteCursors}) => {
             left: cursor.x,
             top: cursor.y
         }}>
-            <div
-            style={{
-            fontSize:"24px",
-            color:cursor.color
-            }}
-            >
-            🖱️
+            <div className="flex items-center gap-2 px-2 py-1 rounded-full shadow dark:bg-gray-800">
+                <img 
+                src={cursor.avatar}
+                alt={cursor.name}
+                className="w-6 h-6 rounded-full"
+                />
+                <span className="text-xs font-medium" style={{color:cursor.color}}>
+                    {cursor.name || "Guest"}
+                </span>
             </div>
-            <div
-            style={{
-                backgroundColor: cursor.color,
-                color:"white",
-                padding:"2px 6px",
-                borderRadius:"6px",
-                fontSize:"11px",
-                marginTop:"-4px",
-                whiteSpace:"nowrap",
-                width:"fit-content",
-                transform:"translate(-50%,-150%)"
-            }}
-            >
-            {
-                userId.slice(0,5)
-             }
-            </div>
+
         </div>
     ))}
     </>

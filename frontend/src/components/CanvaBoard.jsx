@@ -11,6 +11,8 @@ import Users from './Users'
 import useToast from '../hooks/useToast'
 import Toasts from './Toasts'
 import useExport from '../hooks/useExport'
+import useInvite from '../hooks/useInvite'
+import useProfile from '../hooks/useProfile';
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const [color,setColor]=useState("#000000")
@@ -20,12 +22,14 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [tool,setTool]=useState("pencil")
     const [remoteCursors,setRemoteCursors]=useState({});
     
+    const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
-    const {sendCursor}=useCursor(socketRef,getUserId());
+    const {profile}=useProfile();
+    const {sendCursor}=useCursor(socketRef,getUserId(),profile);
     const userId=getUserId();
 
     const handleUndo=()=>{
@@ -98,7 +102,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     useEffect(() => {
         if(roomId && socketRef.current){
             console.log("JOINING ROOM:",roomId);
-            socketRef.current.emit("join-room", { roomId, userId });
+            socketRef.current.emit("join-room", {roomId, userId});
         }
 
     }, [roomId]);
@@ -119,6 +123,8 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         undo={handleUndo}
         redo={handleRedo}
         exportPNG={exportPNG}
+        copyInvite={copyInvite}
+        addToast={addToast}
         />
         <canvas
         ref={canvasRef}

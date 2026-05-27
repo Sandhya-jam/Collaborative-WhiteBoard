@@ -3,7 +3,7 @@ import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash} from '@for
 import Tooltip from './tooltip';
 
 const Toolbar = ({color,setColor,brushSize,setBrushSize,
-  clearCanvas,tool,setTool,darkMode,setDarkMode,undo,redo,exportPNG}) => {
+  clearCanvas,tool,setTool,darkMode,setDarkMode,undo,redo,exportPNG,copyInvite,addToast}) => {
     const baseBtn="relative overflow-hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90";
     const active="bg-blue-500 text-white shadow-md scale-105";
     const inactive="bg-white text-gray-700 hover:bg-gray-200 hover:scale-105";
@@ -80,6 +80,15 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,
       <button onClick={exportPNG}
       className="px-3 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-all"
       >Export PNG</button>
+      {/* Copy Invite */}
+      <button
+      onClick={async()=>{
+        await copyInvite();
+        addToast("Invite link copied","join");
+      }}
+      className="px-3 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 transition-all">
+       Invite
+      </button>
     </div>
   ); 
 }

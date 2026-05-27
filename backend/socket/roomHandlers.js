@@ -11,7 +11,7 @@ export function registerRoomHandlers(socket,io){
             roomUsers.set(roomId, new Set());
         }
         const users=roomUsers.get(roomId);
-        users.add(socket.userId);
+        users.add(userId);
 
         socket.to(roomId).emit("user-joined",userId);
         io.to(roomId).emit("users-update",[...users]);
@@ -31,7 +31,7 @@ export function registerRoomHandlers(socket,io){
         socket.emit("load-room",room.actions);
     });
 
-    socket.on("cursor-move",({x,y,userId,color})=>{
-        socket.to(socket.roomId).emit("cursor-move",{x,y,userId,color});
+    socket.on("cursor-move",({x,y,userId,color,name,avatar})=>{
+        socket.to(socket.roomId).emit("cursor-move",{x,y,userId,color,name,avatar});
     });
 }
