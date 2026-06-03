@@ -4,7 +4,8 @@ const RemoteCursors = ({remoteCursors}) => {
     <>
     {Object.entries(remoteCursors).map(([userId,cursor])=>(
         <div key={userId}
-        className="absolute pointer-events-none z-50"
+        className={`absolute pointer-events-none z-50 transition-opacity duration-500
+            ${cursor.faded ? "opacity-20" : "opacity-100"}`}
         style={{
             left: cursor.x,
             top: cursor.y
