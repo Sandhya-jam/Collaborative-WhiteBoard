@@ -13,6 +13,8 @@ import Toasts from './Toasts'
 import useExport from '../hooks/useExport'
 import useInvite from '../hooks/useInvite'
 import useProfile from '../hooks/useProfile';
+import useTextTool from '../hooks/useTextTool';
+import TextInput from './TextInput';
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const [color,setColor]=useState("#000000")
@@ -21,17 +23,17 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [users,setUsers]=useState([]);
     const [tool,setTool]=useState("pencil")
     const [remoteCursors,setRemoteCursors]=useState({});
-    
+
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast);
-    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction);
     const {profile}=useProfile();
     const {sendCursor}=useCursor(socketRef,getUserId(),profile);
     const userId=getUserId();
-
+    const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(userId,color,addAction,sendAction);
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText);
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
@@ -73,6 +75,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         ctx.lineCap="round";
         
         const handleKey = (e) => {
+        if(e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         switch (e.key.toLowerCase()) {
         case "p":
             setTool("pencil");
@@ -87,7 +90,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             setTool("circle");
             break;
         case "e":
-            clearCanvas();
+            handleClear();
             break;
         default:
             break;
@@ -116,7 +119,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         brushSize={brushSize}
         setBrushSize={setBrushSize}
         clearCanvas={handleClear}
-        tool={setTool}
+        tool={tool}
         setTool={setTool}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
@@ -139,6 +142,12 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         />
         <RemoteCursors remoteCursors={remoteCursors} />
         <Toasts toasts={toasts} />
+        <TextInput
+        position={textPosition}
+        value={textInput}
+        setValue={setTextInput}
+        onSubmit={submitText}
+        />
     </div>
   );
 }

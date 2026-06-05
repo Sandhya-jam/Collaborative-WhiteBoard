@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {getUserId} from "../utils/userId";
-export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction){
+export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -22,7 +22,12 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             color,
             width: brushSize
             });
-        }else{
+        }
+        else if(tool==="text"){
+            startText(x,y);
+            return;
+        }
+        else{
             setStart({x,y});
         }
     };
@@ -95,6 +100,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         let action=null
         if(tool==="pencil"){
         const pencilAction={
+            id:crypto.randomUUID(),
             type: "pencil",
             points: currentPath,
             color,
@@ -110,6 +116,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         }else if(preview){
             action={
                 ...preview,
+                id:crypto.randomUUID(),
                 userId:userId
             };
         }

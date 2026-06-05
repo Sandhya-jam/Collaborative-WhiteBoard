@@ -1,7 +1,7 @@
 export const drawAction = (ctx, action) => {
     if(!action) return;
     ctx.strokeStyle = action.color;
-    ctx.lineWidth = action.width;
+    ctx.lineWidth = action.type === "pencil" ? action.width : action.strokewidth || 3;
     ctx.lineCap = "round";
 
     switch(action.type){
@@ -32,6 +32,11 @@ export const drawAction = (ctx, action) => {
         ctx.arc(action.x,action.y,action.radius,0,Math.PI*2);
         ctx.stroke();
         break;
+        case "text":
+            ctx.fillStyle = action.color;
+            ctx.font = `${action.width || 20}px sans-serif`;
+            ctx.fillText(action.text, action.x, action.y);
+            break;
         default:
             break;
     }

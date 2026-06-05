@@ -1,5 +1,5 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash} from '@fortawesome/free-solid-svg-icons'
+import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash,faLocationArrow,faTextHeight} from '@fortawesome/free-solid-svg-icons'
 import Tooltip from './tooltip';
 
 const Toolbar = ({color,setColor,brushSize,setBrushSize,
@@ -11,14 +11,12 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,
   return (
     <div className="fixed top-4 left-1/4 transform-translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-white shadow-lg rounded-xl border">
       {/* Pencil */}
-      <Tooltip text="Pencil (P)">
         <button
           onClick={(e)=>setTool("pencil")}
           title='Pencil'
           className={`${baseBtn} ${tool==="pencil"?active:inactive}`}>
           <FontAwesomeIcon icon={faPencil}/>
         </button>
-      </Tooltip>
       {/* Line */}
       <button
       onClick={()=>setTool("line")}
@@ -39,6 +37,13 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,
       title='Circle'
       className={`${baseBtn} ${tool==="circle"?active:inactive}`}>
         <FontAwesomeIcon icon={faCircle}/>
+      </button>
+      {/* Text */}
+      <button
+      onClick={()=>setTool("text")}
+      title='Text'
+      className={`${baseBtn} ${tool==="text"?active:inactive}`}>
+        <FontAwesomeIcon icon={faTextHeight}/>
       </button>
       {/* Divider */}
       <div className="w-px h-6 bg-gray-300"></div>
@@ -76,6 +81,10 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,
       </button>
       <button onClick={undo}>Undo</button>
       <button onClick={redo}>Redo</button>
+      <button onClick={()=>setTool("select")}
+        className={`${baseBtn} ${tool==="select"?active:inactive}`}>
+        <FontAwesomeIcon icon={faLocationArrow}/>
+      </button>
       {/* Export PNG */}
       <button onClick={exportPNG}
       className="px-3 py-2 rounded bg-blue-500 text-white hover:bg-blue-600 transition-all"
