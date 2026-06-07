@@ -8,14 +8,17 @@ export function registerRoomHandlers(socket,io){
         socket.userId=userId;
         // Add user to the room
         if (!roomUsers.has(roomId)) {
-            roomUsers.set(roomId, new Set());
+            roomUsers.set(roomId, new Map());
         }
         const users=roomUsers.get(roomId);
-        users.add(userId);
+        if(!users.has(userId)){
+            users.set(userId,new Set());
+        }
+        users.get(userId).add(socket.id);
 
         socket.to(roomId).emit("user-joined",userId);
-        io.to(roomId).emit("users-update",[...users]);
-        console.log("EMITTING USERS:",[...users]);
+        io.to(roomId).emit("users-update",[...users.keys()]);
+        console.log("EMITTING USERS:",[...users.keys()]);
         let room=await Room.findOne({roomId});
         //create room if absent
         if(!room){

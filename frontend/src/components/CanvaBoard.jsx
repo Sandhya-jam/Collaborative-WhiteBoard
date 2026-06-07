@@ -15,6 +15,7 @@ import useInvite from '../hooks/useInvite'
 import useProfile from '../hooks/useProfile';
 import useTextTool from '../hooks/useTextTool';
 import TextInput from './TextInput';
+import useSelection from '../hooks/useSelection';
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const [color,setColor]=useState("#000000")
@@ -32,8 +33,10 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {profile}=useProfile();
     const {sendCursor}=useCursor(socketRef,getUserId(),profile);
     const userId=getUserId();
+    const {selectedId, setSelectedId, dragging, setDragging} = useSelection();
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(userId,color,addAction,sendAction);
-    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText);
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging);
+    
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
@@ -73,7 +76,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         const ctx=canvas.getContext("2d");
         ctx.lineWidth=3;
         ctx.lineCap="round";
-        
+        if(tool!=="select") setSelectedId(null);
         const handleKey = (e) => {
         if(e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         switch (e.key.toLowerCase()) {
@@ -96,11 +99,11 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             break;
         }
     };
-    drawAll(ctx,actions,currentPath,preview,color,brushSize,remotePaths);
+    drawAll(ctx,actions,currentPath,preview,color,brushSize,remotePaths,selectedId);
     window.addEventListener("keydown",handleKey);
     //console.log("ACTIONS:",actions);
     return ()=>window.removeEventListener("keydown",handleKey);
-    },[darkMode,actions,currentPath,preview,remotePaths]);
+    },[darkMode,actions,currentPath,preview,remotePaths,tool,selectedId]);
     
     useEffect(() => {
         if(roomId && socketRef.current){

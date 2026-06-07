@@ -1,17 +1,31 @@
 import { useState } from "react";
 import {getUserId} from "../utils/userId";
-export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText){
+import {hitTest} from "../utils/hitTest";
+
+export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
     const [preview,setPreview]=useState(null);
-    
+
     const userId=getUserId();
     const startDrawing=(e)=>{
         const x=e.nativeEvent.offsetX;
         const y=e.nativeEvent.offsetY;
         
         setDrawing(true);
+        if(tool==="select"){
+            for(let i=actions.length-1;i>=0;i--){
+                if(hitTest(actions[i],x,y)){
+                    setSelectedId(actions[i].id);
+                    setDragging(true);
+                    console.log("selected",actions[i]);
+                    return;
+                }
+            }
+            setSelectedId(null);
+            return;
+        }
         if(tool==="pencil"){
             const point={x,y};
             setCurrentPath([point]);

@@ -1,6 +1,11 @@
-export const drawAction = (ctx, action) => {
+export const drawAction = (ctx, action, selectedId) => {
     if(!action) return;
     ctx.strokeStyle = action.color;
+    ctx.fillStyle = action.color;
+    if(action.id && action.id===selectedId){
+        ctx.strokeStyle="#3b82f6";
+        ctx.fillStyle="#3b82f6";
+    }
     ctx.lineWidth = action.type === "pencil" ? action.width : action.strokewidth || 3;
     ctx.lineCap = "round";
 
@@ -36,13 +41,21 @@ export const drawAction = (ctx, action) => {
             ctx.fillStyle = action.color;
             ctx.font = `${action.width || 20}px sans-serif`;
             ctx.fillText(action.text, action.x, action.y);
+
+            if(action.id && action.id===selectedId){
+                const width=ctx.measureText(action.text).width;
+                const height=action.width || 20;
+                ctx.strokeStyle="#3b82f6";
+                ctx.lineWidth=1;
+                ctx.strokeRect(action.x-4,action.y-height,width+8,height+8);
+            }
             break;
         default:
             break;
     }
 };
 
-export const drawAll = (ctx,actions,currentPath,preview,color,brushSize,remotePaths) => {
+export const drawAll = (ctx,actions,currentPath,preview,color,brushSize,remotePaths,selectedId) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
     console.log(
@@ -60,7 +73,7 @@ console.log(
     remotePaths
 );
     actions?.forEach((action) => {
-        drawAction(ctx, action);
+        drawAction(ctx, action,selectedId);
     });
     
     // draw current path (live preview)
