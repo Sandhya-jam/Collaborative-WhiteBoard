@@ -2,7 +2,7 @@ import { useState } from "react";
 import {getUserId} from "../utils/userId";
 import {hitTest} from "../utils/hitTest";
 
-export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging){
+export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing) {
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -15,9 +15,35 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         
         setDrawing(true);
         if(tool==="select"){
+            if(selectedId){
+                const selected=actions.find(a=>a.id===selectedId);
+                if(selected){
+                    let handleX,handleY;
+                    if(selected.type==="rectangle"){
+                        handleX=selected.x+selected.width;
+                        handleY=selected.y+selected.height;
+                    }else if(selected.type==="circle"){
+                        handleX=selected.x+selected.radius;
+                        handleY=selected.y;
+                    }else if(selected.type==="text"){
+                        const textWidth=selected.text.length*(selected.width || 20)*0.6;
+                        handleX=selected.x+textWidth;
+                        handleY=selected.y+(selected.width || 20)/2;
+                    }else if(selected.type==="line"){
+                        handleX=selected.endX;
+                        handleY=selected.endY;
+                    }
+                    const distance=Math.sqrt((x-handleX)*(x-handleX)+(y-handleY)*(y-handleY));
+                    if(distance<50){
+                        setResizing(true);
+                        return;
+                    }
+                }
+            }
             for(let i=actions.length-1;i>=0;i--){
                 if(hitTest(actions[i],x,y)){
                     setSelectedId(actions[i].id);
+                    setDragOffset({x:x-actions[i].x,y:y-actions[i].y});
                     setDragging(true);
                     console.log("selected",actions[i]);
                     return;
@@ -53,6 +79,47 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         const x=e.nativeEvent.offsetX;
         const y=e.nativeEvent.offsetY;
 
+        if(resizing){
+            setActions(prev=>prev.map(action=>{
+                if(action.id!==selectedId) return action;   
+                if(action.type==="rectangle"){
+                    return{
+                        ...action,
+                        width:x-action.x,
+                        height:y-action.y
+                    };
+                }else if(action.type==="circle"){
+                    const radius=Math.sqrt(Math.pow(x-action.x,2)+Math.pow(y-action.y,2));
+                    return{
+                        ...action,
+                        radius
+                    };
+                }else if(action.type==="text"){
+                    return{
+                        ...action,
+                        width:Math.max(10,x-action.x)
+                    };
+                }else if(action.type==="line"){
+                    return{
+                        ...action,
+                        endX:x,
+                        endY:y
+                    };
+                }
+            }));
+            return;
+        }
+        if(tool==="select" && dragging && selectedId){
+            setActions(prev=>prev.map(action=>{
+                if(action.id!==selectedId) return action;
+                return{
+                    ...action,
+                    x:x-dragOffset.x,
+                    y:y-dragOffset.y
+                };
+            }));
+            return;
+        }
         if(tool==='pencil'){
             const point={x,y}
             setCurrentPath((prev)=>[...prev,point]);
@@ -112,6 +179,11 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         setDrawing(false);
         console.log("Stop drawing triggered")
         let action=null
+        if(tool==="select"){
+            setDragging(false);
+            setResizing(false);
+            return;
+        }
         if(tool==="pencil"){
         const pencilAction={
             id:crypto.randomUUID(),

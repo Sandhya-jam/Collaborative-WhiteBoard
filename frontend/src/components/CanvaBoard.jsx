@@ -33,9 +33,9 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {profile}=useProfile();
     const {sendCursor}=useCursor(socketRef,getUserId(),profile);
     const userId=getUserId();
-    const {selectedId, setSelectedId, dragging, setDragging} = useSelection();
+    const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(userId,color,addAction,sendAction);
-    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging);
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing);
     
     const handleUndo=()=>{
         if(!socketRef.current) return;
@@ -110,8 +110,18 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             console.log("JOINING ROOM:",roomId);
             socketRef.current.emit("join-room", {roomId, userId});
         }
-
     }, [roomId]);
+    
+    useEffect(()=>{
+        const handleDelete=(e)=>{
+            if(e.key!=="Backspace" && e.key!=="Delete") return;
+            if(!selectedId) return;
+            setActions(prev=>prev.filter(a=>a.id!==selectedId));
+            setSelectedId(null);
+        };
+        window.addEventListener("keydown",handleDelete);
+        return ()=>window.removeEventListener("keydown",handleDelete);
+    },[selectedId]);
     
   return (
     <div>

@@ -23,8 +23,20 @@ export const drawAction = (ctx, action, selectedId) => {
         ctx.moveTo(action.startX,action.startY);
         ctx.lineTo(action.endX,action.endY);
         ctx.stroke();
+        if(action.id && action.id===selectedId){
+            ctx.fillStyle="#3b82f6";
+            ctx.beginPath();
+            ctx.arc(action.endX,action.endY,6,0,Math.PI*2);
+            ctx.fill();
+        }
         break;
         case "rectangle":
+        if(action.id && action.id===selectedId){
+            ctx.fillStyle="#3b82f6";
+            ctx.beginPath();
+            ctx.arc(action.x+action.width,action.y+action.height,6,0,Math.PI*2);
+            ctx.fill();
+        }
         ctx.strokeRect(
             action.x,
             action.y,
@@ -36,6 +48,12 @@ export const drawAction = (ctx, action, selectedId) => {
         ctx.beginPath();
         ctx.arc(action.x,action.y,action.radius,0,Math.PI*2);
         ctx.stroke();
+        if(action.id && action.id===selectedId){
+            ctx.fillStyle="#3b82f6";
+            ctx.beginPath();
+            ctx.arc(action.x+action.radius,action.y,6,0,Math.PI*2);
+            ctx.fill();
+        }
         break;
         case "text":
             ctx.fillStyle = action.color;
@@ -48,6 +66,10 @@ export const drawAction = (ctx, action, selectedId) => {
                 ctx.strokeStyle="#3b82f6";
                 ctx.lineWidth=1;
                 ctx.strokeRect(action.x-4,action.y-height,width+8,height+8);
+                ctx.fillStyle="#3b82f6";
+                ctx.beginPath();
+                ctx.arc(action.x+width+8,action.y+8,6,0,Math.PI*2);
+                ctx.fill();
             }
             break;
         default:
