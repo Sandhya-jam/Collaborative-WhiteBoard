@@ -72,7 +72,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         const canvas=canvasRef.current;
         canvas.width=window.innerWidth;
         canvas.height=window.innerHeight-50;
-
+        console.log(window.innerWidth,window.innerHeight);
         const ctx=canvas.getContext("2d");
         ctx.lineWidth=3;
         ctx.lineCap="round";
@@ -99,6 +99,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             break;
         }
     };
+    console.log("CANVASBOARD ACTIONS", actions);
     drawAll(ctx,actions,currentPath,preview,color,brushSize,remotePaths,selectedId);
     window.addEventListener("keydown",handleKey);
     //console.log("ACTIONS:",actions);

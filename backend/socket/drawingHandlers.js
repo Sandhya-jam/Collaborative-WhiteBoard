@@ -31,4 +31,9 @@ export function registerDrawingHandlers(socket){
         await room.save();
         socket.to(socket.roomId).emit("draw-end",data);
     });
+
+    socket.on("update-object",(data)=>{
+        console.log("SERVER RECEIVED",data);
+        socket.to(socket.roomId).emit("update-object",data);
+    });
 }

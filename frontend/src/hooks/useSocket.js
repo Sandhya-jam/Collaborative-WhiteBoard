@@ -38,6 +38,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             socket.off("draw-start");
             socket.off("draw-move");
             socket.off("draw-end");
+            socket.off("update-object");
             socket.off("undo");
             socket.off("redo");
             socket.off("clear-canvas");

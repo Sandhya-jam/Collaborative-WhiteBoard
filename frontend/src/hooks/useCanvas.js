@@ -35,19 +35,36 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                     }
                     const distance=Math.sqrt((x-handleX)*(x-handleX)+(y-handleY)*(y-handleY));
                     if(distance<50){
+                        socketRef.current?.emit("update-object",{
+                            id:selected.id,
+                            updates:{x:handleX,y:handleY}
+                        })
                         setResizing(true);
                         return;
                     }
                 }
             }
+            const matches=[];
             for(let i=actions.length-1;i>=0;i--){
                 if(hitTest(actions[i],x,y)){
-                    setSelectedId(actions[i].id);
-                    setDragOffset({x:x-actions[i].x,y:y-actions[i].y});
-                    setDragging(true);
-                    console.log("selected",actions[i]);
-                    return;
+                    matches.push(actions[i]);
                 }
+            }
+            if(matches.length>0){
+                const priority={
+                    "text":4,
+                    "rectangle":3,
+                    "circle":2, 
+                    "line":1,
+                    "pencil":0
+                };
+                matches.sort((a,b)=>priority[b.type]-priority[a.type]);
+                const selected=matches[0];
+                setSelectedId(selected.id);
+                setDragOffset({x:x-selected.x,y:y-selected.y});
+                setDragging(true);
+                console.log("Selected action:", selected);
+                return;
             }
             setSelectedId(null);
             return;
@@ -81,8 +98,22 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
 
         if(resizing){
             setActions(prev=>prev.map(action=>{
-                if(action.id!==selectedId) return action;   
+                if(action.id!==selectedId) return action; 
+                const width = x - action.x;
+                const height = y - action.y;
+
+                console.log("EMIT RECT", {
+                    id: action.id,
+                    x: action.x,
+                    y: action.y,
+                    width,
+                    height
+                });  
                 if(action.type==="rectangle"){
+                    socketRef.current?.emit("update-object",{
+                        id:action.id,
+                        updates:{width:x-action.x,height:y-action.y}
+                    })
                     return{
                         ...action,
                         width:x-action.x,
@@ -90,16 +121,29 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                     };
                 }else if(action.type==="circle"){
                     const radius=Math.sqrt(Math.pow(x-action.x,2)+Math.pow(y-action.y,2));
+                    console.log("EMITTING UPDATE",{id:action.id,updates:{radius}});
+                    socketRef.current?.emit("update-object",{
+                        id:action.id,
+                        updates:{radius}
+                    })
                     return{
                         ...action,
                         radius
                     };
                 }else if(action.type==="text"){
+                    socketRef.current?.emit("update-object",{
+                        id:action.id,
+                        updates:{width:Math.max(10,x-action.x)}
+                    })
                     return{
                         ...action,
                         width:Math.max(10,x-action.x)
                     };
                 }else if(action.type==="line"){
+                    socketRef.current?.emit("update-object",{
+                        id:action.id,
+                        updates:{endX:x,endY:y}
+                    })
                     return{
                         ...action,
                         endX:x,
@@ -110,6 +154,10 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             return;
         }
         if(tool==="select" && dragging && selectedId){
+            socketRef.current?.emit("update-object",{
+                id:selectedId,
+                updates:{x:x-dragOffset.x,y:y-dragOffset.y}
+            });
             setActions(prev=>prev.map(action=>{
                 if(action.id!==selectedId) return action;
                 return{

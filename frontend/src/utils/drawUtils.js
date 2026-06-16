@@ -31,6 +31,13 @@ export const drawAction = (ctx, action, selectedId) => {
         }
         break;
         case "rectangle":
+        console.log(
+            "DRAW RECT",
+            action.x,
+            action.y,
+            action.width,
+            action.height
+        );
         if(action.id && action.id===selectedId){
             ctx.fillStyle="#3b82f6";
             ctx.beginPath();
@@ -82,7 +89,7 @@ export const drawAll = (ctx,actions,currentPath,preview,color,brushSize,remotePa
 
     console.log(
     "DRAWALL ACTIONS:",
-    actions.map(
+    actions?.map(
         a=>({
             userId:a.userId,
             type:a.type

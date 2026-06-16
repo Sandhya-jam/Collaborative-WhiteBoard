@@ -7,12 +7,12 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
     socket.off("redo");
     socket.off("clear-canvas");
     socket.off("load-room");
-
+    socket.off("update-object");
     socket.on("draw-action",(action)=>{
-            if(action.type!=="pencil"){
-                addAction(action);
-            }  
-        })
+        if(action.type!=="pencil"){
+            addAction(action);
+        }  
+    })
     //START
     socket.on("draw-start",({userId,point,color,width})=>{
         setRemotePaths((prev)=>({
@@ -70,4 +70,10 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         console.log("ROOM LOADED",actions.length);
         setActions(actions);
     });
-}
+
+    socket.on("update-object",({id,updates})=>{
+        console.log("CLIENT RECEIVED UPDATE",id,updates);
+        // console.log("SETACTIONS EXISTS?", setActions);
+        setActions(prev=>prev.map(action=>action.id===id?{...action,...updates}:action));
+    });
+} 
