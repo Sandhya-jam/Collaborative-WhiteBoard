@@ -8,9 +8,12 @@ import {roomUsers} from "./store/presenceStore.js"
 import { registerDrawingHandlers } from "./socket/drawingHandlers.js"
 import { registerHistoryHandlers } from "./socket/historyHandlers.js"
 import { registerRoomHandlers } from "./socket/roomHandlers.js"
+import authRoutes from './routes/authRoutes.js'
 
 const app=express();
 app.use(cors());
+app.use(express.json());
+app.use('/api/auth',authRoutes)
 
 dotenv.config();
 //app.use(express.json());
