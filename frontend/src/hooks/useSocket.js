@@ -5,7 +5,8 @@ import attachPresenceListeners from "./socketListeners/presenceListeners";
 import attachCursorListeners from "./socketListeners/cursorListeners";
 import attachToastListeners from "./socketListeners/toastListeners";
 
-export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast){
+export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,
+    setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation){
     const clearRef=useRef();
     const undoRef=useRef();
     const redoRef=useRef();
@@ -23,7 +24,8 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             console.log("Connected: ",socket.id);
         });
 
-        attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef);
+        attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef,
+            setHistory,setRedoHistory,addModifyOperation);
         attachPresenceListeners(socket,setUsers);
         attachCursorListeners(socket,setRemoteCursors);
         attachToastListeners(socket,addToast);

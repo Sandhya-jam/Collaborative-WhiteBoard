@@ -2,14 +2,6 @@ import Room from "../models/Room.js";
 
 export function registerDrawingHandlers(socket){
     socket.on("draw-action", async(action) => {//for shapes
-        const room=await Room.findOne({roomId:socket.roomId});
-        if(!room){
-            console.log("ROOM NOT FOUND",socket.roomId);
-            return;
-        }
-        room?.actions?.push(action);
-        room?.redoStack?.push(action);
-        await room.save();
         socket.to(socket.roomId).emit("draw-action", action);
     });
     socket.on("draw-start",(data)=>{
@@ -21,14 +13,6 @@ export function registerDrawingHandlers(socket){
     });
 
     socket.on("draw-end",async(data)=>{//for pencil
-        const room=await Room.findOne({roomId:socket.roomId});
-        if(!room){
-            console.log("ROOM NOT FOUND",socket.roomId);
-            return;
-        }
-        room?.actions?.push(data.action);
-        room.redoStack=[]
-        await room.save();
         socket.to(socket.roomId).emit("draw-end",data);
     });
 
@@ -37,10 +21,24 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("update-object",{id,updates});
     });
 
-    socket.on("persist-object",async({id,updates})=>{
-        const room =await Room.findOne({roomId:socket.roomId});
-        room.actions=room.actions.map(action=>action.id===id?{...action,...updates}:action);
-        room.redoStack=room.redoStack?.push(...room.actions.filter(action=>action.id===id));
-        await room.save();
+    socket.on("modify-object",({before,after})=>{
+        socket.to(socket.roomId).emit("modify-object",
+            {
+                before,
+                after
+            }
+        );
+    });
+
+    socket.on("persist-object",async({actions,history,redoHistory})=>{
+        await Room.findOneAndUpdate(
+            {roomId:socket.roomId},
+            {
+                actions,
+                history,
+                redoHistory
+            },
+        );
+        console.log("ROOM PERSISTED");
     });
 }

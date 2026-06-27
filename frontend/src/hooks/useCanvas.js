@@ -3,7 +3,7 @@ import {getUserId} from "../utils/userId";
 import {hitTest} from "../utils/hitTest";
 
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
-    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation) {
+    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId) {
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -19,6 +19,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         if(tool==="select"){
             if(selectedId){
                 const selected=actions.find(a=>a.id===selectedId);
+                if(!selected || selected.userId!==CurruserId) return;
                 if(selected){
                     let handleX,handleY;
                     if(selected.type==="rectangle"){
@@ -45,6 +46,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             }
             const matches=[];
             for(let i=actions.length-1;i>=0;i--){
+                if(actions[i].userId!==CurruserId) continue;
                 if(hitTest(actions[i],x,y)){
                     matches.push(actions[i]);
                 }
@@ -230,10 +232,6 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         let action=null
         if(tool==="select"){
             if(dragging || resizing){
-                socketRef.current?.emit("persist-object",{
-                    id:selectedId,
-                    updates:actions.find(a=>a.id===selectedId)
-                });
                 console.log("BEFORE REF", beforeEditRef.current);
                 console.log("AFTER REF", afterEditRef.current);
                 if(beforeEditRef.current && afterEditRef.current){
@@ -241,6 +239,10 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                         beforeEditRef.current,
                         afterEditRef.current
                     );
+                    socketRef.current?.emit("modify-object",{
+                        before:beforeEditRef.current,
+                        after:afterEditRef.current
+                    });
                     beforeEditRef.current=null;
                     afterEditRef.current=null;
                 }

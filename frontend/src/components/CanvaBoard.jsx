@@ -18,6 +18,7 @@ import TextInput from './TextInput';
 import useSelection from '../hooks/useSelection';
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
+    const firstLoad=useRef(null)
     const [color,setColor]=useState("#000000")
     const [brushSize,setBrushSize]=useState(3)
     const [remotePaths,setRemotePaths]=useState({});
@@ -28,15 +29,15 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
-    const {actions,setActions,addAction,undo,redo,clearCanvas,history,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
-    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast);
+    const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
+    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation);
     const {profile}=useProfile();
     const {sendCursor}=useCursor(socketRef,getUserId(),profile);
     const userId=getUserId();
     const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(userId,color,addAction,sendAction);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
-        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation);
+        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,userId);
     
     const handleUndo=()=>{
         if(!socketRef.current) return;
@@ -112,6 +113,23 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             socketRef.current.emit("join-room", {roomId, userId});
         }
     }, [roomId]);
+
+    useEffect(()=>{
+        if(firstLoad.current){
+            firstLoad.current=false
+            return;
+        }
+        const timer=setTimeout(()=>{
+            socketRef.current?.emit("persist-object",
+                {
+                    actions,
+                    history,
+                    redoHistory
+                }
+            );
+        },300);
+        return()=>clearTimeout(timer);
+    },[actions])
     
     useEffect(()=>{
         const handleDelete=(e)=>{

@@ -1,4 +1,5 @@
-export default function attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef){
+export default function attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,
+    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation){
     socket.off("draw-action");
     socket.off("draw-start");
     socket.off("draw-move");
@@ -66,9 +67,11 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         clearRef.current?.(userId);
     });
 
-    socket.on("load-room",(actions)=>{
+    socket.on("load-room",({actions,history,redoHistory})=>{
         console.log("ROOM LOADED",actions.length);
         setActions(actions);
+        setHistory(history||[])
+        setRedoHistory(redoHistory||[])
     });
 
     socket.on("update-object",({id,updates})=>{
@@ -84,5 +87,8 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         setActions(prev=>prev.map(action=>action.id===id?{...action,...updates}:action));
     });
 
-    
-} 
+    socket.on("modify-object",({before,after})=>{
+        console.log("Remote Modify",before.id);
+        addModifyOperation(before,after);
+    })
+};

@@ -22,7 +22,7 @@ export function registerRoomHandlers(socket,io){
         let room=await Room.findOne({roomId});
         //create room if absent
         if(!room){
-            room=await Room.create({roomId,actions:[],redoStack:[]});
+            room=await Room.create({roomId,actions:[],history:[],redoHistory:[]});
         }
         
         console.log("JOIN ROOM:",roomId);
@@ -31,7 +31,11 @@ export function registerRoomHandlers(socket,io){
         console.log(`User ${socket.id} joined room ${roomId}`);
   
         //send old room state
-        socket.emit("load-room",room.actions);
+        socket.emit("load-room",{
+            actions:room.actions,
+            history:room.history,
+            redoHistory:room.redoHistory
+        });
     });
 
     socket.on("cursor-move",({x,y,userId,color,name,avatar})=>{
