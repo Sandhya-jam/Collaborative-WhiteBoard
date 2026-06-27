@@ -28,14 +28,15 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
-    const {actions,setActions,addAction,undo,redo,clearCanvas}=useHistory();
+    const {actions,setActions,addAction,undo,redo,clearCanvas,history,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast);
     const {profile}=useProfile();
     const {sendCursor}=useCursor(socketRef,getUserId(),profile);
     const userId=getUserId();
     const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(userId,color,addAction,sendAction);
-    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing);
+    const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
+        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation);
     
     const handleUndo=()=>{
         if(!socketRef.current) return;
@@ -102,7 +103,6 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     console.log("CANVASBOARD ACTIONS", actions);
     drawAll(ctx,actions,currentPath,preview,color,brushSize,remotePaths,selectedId);
     window.addEventListener("keydown",handleKey);
-    //console.log("ACTIONS:",actions);
     return ()=>window.removeEventListener("keydown",handleKey);
     },[darkMode,actions,currentPath,preview,remotePaths,tool,selectedId]);
     

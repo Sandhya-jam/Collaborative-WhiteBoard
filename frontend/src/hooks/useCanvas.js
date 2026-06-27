@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState,useRef } from "react";
 import {getUserId} from "../utils/userId";
 import {hitTest} from "../utils/hitTest";
 
-export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing) {
+export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
+    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation) {
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
     const [preview,setPreview]=useState(null);
-
+    const beforeEditRef=useRef(null);
+    const afterEditRef=useRef(null);
     const userId=getUserId();
     const startDrawing=(e)=>{
         const x=e.nativeEvent.offsetX;
@@ -35,10 +37,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                     }
                     const distance=Math.sqrt((x-handleX)*(x-handleX)+(y-handleY)*(y-handleY));
                     if(distance<50){
-                        socketRef.current?.emit("update-object",{
-                            id:selected.id,
-                            updates:{x:handleX,y:handleY}
-                        })
+                        beforeEditRef.current=structuredClone(selected);
                         setResizing(true);
                         return;
                     }
@@ -60,6 +59,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                 };
                 matches.sort((a,b)=>priority[b.type]-priority[a.type]);
                 const selected=matches[0];
+                beforeEditRef.current=structuredClone(selected);
                 setSelectedId(selected.id);
                 setDragOffset({x:x-selected.x,y:y-selected.y});
                 setDragging(true);
@@ -99,72 +99,73 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         if(resizing){
             setActions(prev=>prev.map(action=>{
                 if(action.id!==selectedId) return action; 
-                const width = x - action.x;
-                const height = y - action.y;
 
-                console.log("EMIT RECT", {
-                    id: action.id,
-                    x: action.x,
-                    y: action.y,
-                    width,
-                    height
-                });  
+                let updatedAction=action;
                 if(action.type==="rectangle"){
-                    socketRef.current?.emit("update-object",{
-                        id:action.id,
-                        updates:{width:x-action.x,height:y-action.y}
-                    })
-                    return{
+                    updatedAction={
                         ...action,
                         width:x-action.x,
                         height:y-action.y
                     };
+                    socketRef.current?.emit("update-object",{
+                        id:action.id,
+                        updates:{width:x-action.x,height:y-action.y}
+                    })
                 }else if(action.type==="circle"){
                     const radius=Math.sqrt(Math.pow(x-action.x,2)+Math.pow(y-action.y,2));
-                    console.log("EMITTING UPDATE",{id:action.id,updates:{radius}});
+                    updatedAction={
+                        ...action,
+                        radius
+                    };
                     socketRef.current?.emit("update-object",{
                         id:action.id,
                         updates:{radius}
                     })
-                    return{
-                        ...action,
-                        radius
-                    };
                 }else if(action.type==="text"){
+                    updatedAction={
+                        ...action,
+                        width:Math.max(10,x-action.x)
+                    };
                     socketRef.current?.emit("update-object",{
                         id:action.id,
                         updates:{width:Math.max(10,x-action.x)}
                     })
-                    return{
+                }else if(action.type==="line"){
+                    updatedAction={
                         ...action,
                         width:Math.max(10,x-action.x)
                     };
-                }else if(action.type==="line"){
                     socketRef.current?.emit("update-object",{
                         id:action.id,
                         updates:{endX:x,endY:y}
                     })
-                    return{
-                        ...action,
-                        endX:x,
-                        endY:y
-                    };
                 }
+                afterEditRef.current=structuredClone(updatedAction);
+                return updatedAction;
             }));
             return;
         }
         if(tool==="select" && dragging && selectedId){
+            const newX = x - dragOffset.x;
+            const newY = y - dragOffset.y;
             socketRef.current?.emit("update-object",{
                 id:selectedId,
-                updates:{x:x-dragOffset.x,y:y-dragOffset.y}
+                updates:{x:newX,y:newY}
             });
             setActions(prev=>prev.map(action=>{
                 if(action.id!==selectedId) return action;
-                return{
+                const updatedAction = {
                     ...action,
-                    x:x-dragOffset.x,
-                    y:y-dragOffset.y
+                    x:newX,
+                    y:newY
                 };
+                afterEditRef.current=structuredClone(updatedAction);
+                console.log("AFTER EDIT DRAG",{
+                    ...action,
+                    x:newX,
+                    y:newY
+                });
+                return updatedAction;
             }));
             return;
         }
@@ -228,6 +229,22 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         console.log("Stop drawing triggered")
         let action=null
         if(tool==="select"){
+            if(dragging || resizing){
+                socketRef.current?.emit("persist-object",{
+                    id:selectedId,
+                    updates:actions.find(a=>a.id===selectedId)
+                });
+                console.log("BEFORE REF", beforeEditRef.current);
+                console.log("AFTER REF", afterEditRef.current);
+                if(beforeEditRef.current && afterEditRef.current){
+                    addModifyOperation(
+                        beforeEditRef.current,
+                        afterEditRef.current
+                    );
+                    beforeEditRef.current=null;
+                    afterEditRef.current=null;
+                }
+            }
             setDragging(false);
             setResizing(false);
             return;

@@ -73,7 +73,16 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
 
     socket.on("update-object",({id,updates})=>{
         console.log("CLIENT RECEIVED UPDATE",id,updates);
+            if(updates.width){
+
+            console.log(
+                "RECEIVED RECT UPDATE",
+                updates
+            );
+        }
         // console.log("SETACTIONS EXISTS?", setActions);
         setActions(prev=>prev.map(action=>action.id===id?{...action,...updates}:action));
     });
+
+    
 } 

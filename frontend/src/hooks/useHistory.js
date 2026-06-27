@@ -1,32 +1,71 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState,useEffect, act} from "react";
 
 export default function useHistory(){
     const [actions,setActions]=useState([]);
     const [redoStack,setRedoStack]=useState([]);
-
+    const [history,setHistory]=useState([]);
+    const [redoHistory,setRedoHistory]=useState([]);
     const addAction=(action)=>{
         setActions((prev)=>[...prev,action]);
+        setHistory(prev=>[
+            ...prev,
+            {
+                operation:"create",
+                object:structuredClone(action)
+            }
+        ]);
+        setRedoHistory([]);
         setRedoStack([]);
     }
 
+    const addModifyOperation=(before,after)=>{
+        setHistory(prev=>[
+            ...prev,
+            {
+                operation:"modify",
+                before:structuredClone(before),
+                after:structuredClone(after)
+            }
+        ]);
+        setRedoHistory([]);
+    };
+
     const undo=useCallback((userId)=>{
         console.log("UNDO CALLED ON CLIENT:", userId);
-        setActions((prev)=>{
-            console.log("BEFORE:", prev);
-            for(let i=prev.length-1;i>=0;i--){
-                if(prev[i].userId===userId){
-                    //console.log("REMOVING:", prev[i]);
-                    const newActions=[...prev];
-                    const removed=newActions.splice(i,1)[0];
+        setHistory(prevHistory=>{
+            for(let i=prevHistory.length-1;i>=0;i--){
+                const operation=prevHistory[i];
+                const opUser=operation.operation==="create"
+                ? operation.object.userId:operation.before.userId;
 
-                    setRedoStack(r=>[...r,removed]);
-                    console.log("AFTER:", newActions);
-                    return newActions;
+                if(opUser!==userId) continue;
+
+                const newHistory=[...prevHistory];
+                const removedOp=newHistory.splice(i,1)[0];
+
+                setRedoHistory(prev=>[
+                    ...prev,
+                    removedOp
+                ]);
+
+                if(removedOp.operation==="create"){
+                    setActions(prev=>
+                        prev.filter(action=>
+                            action.id!==removedOp.object.id
+                        )
+                    );
+                }else if(removedOp.operation==="modify"){
+                    setActions(prev=>
+                        prev.map(action=>
+                            action.id===removedOp.before.id
+                            ?structuredClone(removedOp.before):action
+                        )
+                    );
                 }
+                return newHistory;
             }
-            //console.log("NO MATCH FOUND ❌");
-            return prev;
-        });
+            return prevHistory;
+        })
     },[]);
     
     const redo=useCallback((userId)=>{
@@ -68,5 +107,6 @@ export default function useHistory(){
         });
     },[]);
 
-  return{actions,setActions,addAction,undo,redo,clearCanvas}
+  return{actions,setActions,addAction,undo,redo,clearCanvas,
+    history,addModifyOperation,redoHistory,setRedoHistory}
 }

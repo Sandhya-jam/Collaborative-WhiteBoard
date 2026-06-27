@@ -32,8 +32,15 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("draw-end",data);
     });
 
-    socket.on("update-object",(data)=>{
-        console.log("SERVER RECEIVED",data);
-        socket.to(socket.roomId).emit("update-object",data);
+    socket.on("update-object",async({id,updates})=>{
+        console.log("SERVER RECEIVED",id,updates);
+        socket.to(socket.roomId).emit("update-object",{id,updates});
+    });
+
+    socket.on("persist-object",async({id,updates})=>{
+        const room =await Room.findOne({roomId:socket.roomId});
+        room.actions=room.actions.map(action=>action.id===id?{...action,...updates}:action);
+        room.redoStack=room.redoStack?.push(...room.actions.filter(action=>action.id===id));
+        await room.save();
     });
 }
