@@ -9,13 +9,14 @@ import { registerDrawingHandlers } from "./socket/drawingHandlers.js"
 import { registerHistoryHandlers } from "./socket/historyHandlers.js"
 import { registerRoomHandlers } from "./socket/roomHandlers.js"
 import authRoutes from './routes/authRoutes.js'
+import roomRoutes from './routes/roomRoutes.js'
 
 const app=express();
 app.use(cors());
 app.use(express.json());
-app.use('/api/auth',authRoutes)
 
 dotenv.config();
+connectDB();
 //app.use(express.json());
 const server=http.createServer(app);
 //Creates a WebSocket server & Attaches it to HTTP server
@@ -56,7 +57,9 @@ io.on("connection",(socket)=>{
     });
 });
 
-connectDB();
+app.use('/api/auth',authRoutes)
+app.use('/api/rooms',roomRoutes);
+
 const PORT=process.env.PORT||5000
 server.listen(PORT,()=>{
     console.log(`Server running on port ${PORT}`)

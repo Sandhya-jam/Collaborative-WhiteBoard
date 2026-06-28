@@ -2,6 +2,25 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body,
+#root{
+    height:100%;
+}
+
+body{
+    background:#0D1117;
+    
+    font-family:"Inter",sans-serif;
+    overflow-x:hidden;
+}
+
+::selection{
+    background:#7C3AED;
+    color:white;
+
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
