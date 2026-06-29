@@ -1,10 +1,11 @@
-const Input = ({label,type="text",placeholder,value,onChange})=> {
+const Input = ({label,name,type="text",placeholder,value,onChange})=> {
   return (
     <div className="space-y-2">
         <label className="text-sm text-muted">
             {label}
         </label>
         <input 
+        name={name}
         type={type}
         value={value}
         placeholder={placeholder}
