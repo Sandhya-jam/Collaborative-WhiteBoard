@@ -119,21 +119,24 @@ export default function useHistory(){
     const clearCanvas=useCallback((userId)=>{
         console.log("CLEAR FN CALLED");
         // if(actions.length==0) return;
-        const removedObj=actions.filter(action=>action.userId===userId);
-        if(removedObj.length===0) return;
-
-        setHistory(history=>[
-            ...history,
-            {
-                operation:"clear",
-                objects:structuredClone(removedObj)
-            }
-        ]);
-        setRedoHistory([]);
-        setActions(prev=>
-            prev.filter(action=>action.userId!==userId)
-        )
-    },[actions]);
+        setActions(prev=>{
+            const removeObj=prev.filter(
+                action=>action.userId===userId
+            );
+            if(removeObj.length===0) return prev;
+            setHistory(history=>[
+                ...history,
+                {
+                    operation:"clear",
+                    objects:structuredClone(removeObj)
+                }
+            ]);
+            setRedoHistory([]);
+            return prev.filter(
+                action=>action.userId!==userId
+            );
+        });
+    });
 
   return{actions,setActions,addAction,undo,redo,clearCanvas,
     history,setHistory,addModifyOperation,redoHistory,setRedoHistory}
