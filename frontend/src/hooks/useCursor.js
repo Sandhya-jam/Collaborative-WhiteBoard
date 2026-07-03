@@ -8,8 +8,8 @@ const useCursor = (socketRef,userId,profile) => {
             x:e.clientX,
             y:e.clientY,
             color:getUserColor(userId),
-            name:profile.name,
-            avatar:profile.avatar
+            name:profile?.name,
+            avatar:profile?.avatar
         });
     };
 

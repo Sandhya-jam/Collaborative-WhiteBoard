@@ -1,5 +1,5 @@
 import { useState,useRef } from "react";
-import {getUserId} from "../utils/userId";
+import {getUser} from "../utils/auth";
 import {hitTest} from "../utils/hitTest";
 
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
@@ -10,7 +10,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
     const [preview,setPreview]=useState(null);
     const beforeEditRef=useRef(null);
     const afterEditRef=useRef(null);
-    const userId=getUserId();
+    const userId=getUser()._id;
     const startDrawing=(e)=>{
         const x=e.nativeEvent.offsetX;
         const y=e.nativeEvent.offsetY;

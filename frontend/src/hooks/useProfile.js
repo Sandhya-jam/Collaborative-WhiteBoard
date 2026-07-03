@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useMemo} from "react";
 
 const avatars=[
     "https://api.dicebear.com/7.x/bottts/svg?seed=1",
@@ -8,21 +8,25 @@ const avatars=[
     "https://api.dicebear.com/7.x/bottts/svg?seed=5"
 ];
 
-export default function useProfile(){
-    const [profile,setProfile]=useState(()=>{
-        const saved=localStorage.getItem("profile");
-        return saved?JSON.parse(saved):{
-            username:"",
-            avatar:avatars[Math.floor(Math.random()*avatars.length)]
-        };
-    });
+export default function useProfile() {
 
-    useEffect(()=>{
-        localStorage.setItem("profile",JSON.stringify(profile));
-    },[profile]);
+    const user = JSON.parse(localStorage.getItem("user"));
 
-    return{
-        profile,
-        setProfile
-    };
+    const profile = useMemo(() => ({
+
+        userId: user?._id,
+
+        name: user?.name,
+
+        email: user?.email,
+
+        avatar:
+            avatars[
+                user
+                    ? user.name.charCodeAt(0) % avatars.length
+                    : 0
+            ]
+
+    }), [user]);
+    return profile;
 }

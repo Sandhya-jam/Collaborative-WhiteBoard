@@ -2,7 +2,7 @@ import Room from "../models/Room.js";
 import {roomUsers} from "../store/presenceStore.js";
 
 export function registerRoomHandlers(socket,io){
-    socket.on("join-room",async({roomId,userId})=>{
+    socket.on("join-room",async({roomId,userId,name,email})=>{
         socket.join(roomId);
         socket.roomId=roomId;
         socket.userId=userId;
@@ -12,13 +12,22 @@ export function registerRoomHandlers(socket,io){
         }
         const users=roomUsers.get(roomId);
         if(!users.has(userId)){
-            users.set(userId,new Set());
+            users.set(userId,{
+                userId,
+                name,
+                email,
+                sockets:new Set()
+            });
         }
-        users.get(userId).add(socket.id);
+        users.get(userId).sockets.add(socket.id);
 
         socket.to(roomId).emit("user-joined",userId);
-        io.to(roomId).emit("users-update",[...users.keys()]);
-        console.log("EMITTING USERS:",[...users.keys()]);
+        io.to(roomId).emit("users-update",[...users.values()].map(user=>({
+            userId:user.userId,
+            name:user.name,
+            email:user.email,
+        })));
+        // console.log("EMITTING USERS:",[...users.keys()]);
         let room=await Room.findOne({roomId});
         //create room if absent
         if(!room){

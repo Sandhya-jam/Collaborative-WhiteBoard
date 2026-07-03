@@ -38,21 +38,30 @@ io.on("connection",(socket)=>{
     socket.on("disconnect",()=>{
         const roomId=socket.roomId;
         const userId=socket.userId;
-        if(roomId && roomUsers.has(roomId)){{
-            const users=roomUsers.get(roomId);
-            const sockets=users.get(userId);
-            sockets.delete(socket.id);
-            if(sockets.size===0){
-                users.delete(userId);
-            }
-            socket.to(roomId).emit("user-left",userId);
-            io.to(roomId).emit("users-update",[...users.keys()]);
+        if(!roomId || !userId) return;
+        const users=roomUsers.get(roomId);
+        if(!users) return;
+        const user=users.get(userId);
+        if(!user) return;
 
-            if(users.size===0){
-                roomUsers.delete(roomId);
-            }
-            socket.to(roomId).emit("cursor-remove",userId);
-        }}
+        user.sockets.delete(socket.id);
+        //Remove user
+        if(user.sockets.size==0){
+            users.delete(userId);
+            socket.to(roomId).emit("user-left",userId);
+        }
+        //Remove room if empty
+        if(users.size===0){
+            roomUsers.delete(roomId)
+        }else{
+            io.to(roomId).emit("users-update",
+                [...users.values()].map(user=>({
+                    userId:user.userId,
+                    name:user.name,
+                    email:user.email
+                }))
+            )
+        }
         console.log("User disconnected:",socket.id);
     });
 });

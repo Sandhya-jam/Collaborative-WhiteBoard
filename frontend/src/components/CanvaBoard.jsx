@@ -4,7 +4,7 @@ import useHistory from '../hooks/useHistory'
 import useCanvas from '../hooks/useCanvas'
 import { drawAll } from '../utils/drawUtils'
 import useSocket from '../hooks/useSocket'
-import { getUserId } from '../utils/userId'
+import {getUser} from '../utils/auth' 
 import RemoteCursors from './RemoteCursors'
 import useCursor from '../hooks/useCursor'
 import Users from './Users'
@@ -31,18 +31,19 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation);
-    const {profile}=useProfile();
-    const {sendCursor}=useCursor(socketRef,getUserId(),profile);
-    const userId=getUserId();
+    const profile=useProfile();
+    const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
+    const user=getUser();
     const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
-    const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(userId,color,addAction,sendAction);
+    const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(user._id,color,addAction,sendAction);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
-        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,userId);
+        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id);
     
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
         console.log("UNDO BUTTON CLICKED");
+        const userId=user._id
         undo(userId);
         console.log("EMITTING UNDO");
         socketRef.current.emit("undo",{userId});
@@ -51,6 +52,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const handleRedo = () => {
         if (!socketRef?.current) return;
         console.log("REDO BUTTON CLICKED");
+        const userId=user._id
         redo(userId);
 
         socketRef.current.emit("redo", { userId });
@@ -63,7 +65,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             "Clear your drawings?"
         );
         if (!confirmed) return;
-
+        const userId=user._id
         console.log("CLEAR CLICKED", userId);
         clearCanvas(userId);
         console.log("EMITTING CLEAR");
@@ -110,7 +112,10 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     useEffect(() => {
         if(roomId && socketRef.current){
             console.log("JOINING ROOM:",roomId);
-            socketRef.current.emit("join-room", {roomId, userId});
+            const userId=user?._id;
+            const userName=user?.name;
+            const userEmail=user?.email;
+            socketRef.current.emit("join-room", {roomId,userId,userName,userEmail});
         }
     }, [roomId]);
 
