@@ -7,6 +7,7 @@ import AuthCard from "../components/common/AuthCard"
 import Logo from "../components/common/Logo"
 import Input from "../components/common/Input"
 import Button from "../components/common/Button"
+import { saveUser } from "../utils/auth"
 import { useLoginMutation } from "../features/auth/authApi"
 
 const Login = () => {
@@ -26,8 +27,7 @@ const Login = () => {
     try {
       const data=await login(formData).unwrap();
 
-      localStorage.setItem("token",data.token);
-      localStorage.setItem("user",JSON.stringify(data));
+      saveUser(data)
       toast.success("Welcome Back!");
       navigate("/dashboard");
     } catch (error) {

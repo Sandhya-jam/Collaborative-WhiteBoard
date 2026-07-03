@@ -7,6 +7,7 @@ import Logo from "../components/common/Logo"
 import AuthCard from "../components/common/AuthCard"
 import Input from "../components/common/Input"
 import Button from "../components/common/Button"
+import { saveUser } from "../utils/auth"
 import {useSignupMutation} from "../features/auth/authApi"
 
 const Signup = () => {
@@ -26,8 +27,7 @@ const Signup = () => {
     try {
       const data=await signup(formData).unwrap();
 
-      localStorage.setItem("token",data.token);
-      localStorage.setItem("user",JSON.stringify(data));
+      saveUser(data)
       toast.success("Account Created");
       navigate("/dashboard");
     } catch (error) {
