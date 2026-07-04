@@ -1,14 +1,16 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash,faLocationArrow,faTextHeight} from '@fortawesome/free-solid-svg-icons'
 import Tooltip from './tooltip';
-
-const Toolbar = ({color,setColor,brushSize,setBrushSize,
-  clearCanvas,tool,setTool,darkMode,setDarkMode,undo,redo,exportPNG,copyInvite,addToast}) => {
+import { useState } from 'react';
+const Toolbar = ({color,setColor,brushSize,setBrushSize,clearCanvas,tool,setTool,darkMode,
+  setDarkMode,undo,redo,exportPNG,copyInvite,addToast,sendReaction}) => {
     const baseBtn="relative overflow-hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90";
     const active="bg-blue-500 text-white shadow-md scale-105";
     const inactive="bg-white text-gray-700 hover:bg-gray-200 hover:scale-105";
-
+    const [showReactions,setShowReactions]=useState(false)
+    const reactions = ["👍", "❤️", "😂", "🎉", "👏"];
   return (
+    <>
     <div className="fixed top-4 left-1/4 transform-translate-x-1/2 flex items-center gap-3 px-4 py-2 bg-white shadow-lg rounded-xl border">
       {/* Pencil */}
         <button
@@ -98,7 +100,23 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,
       className="px-3 py-2 rounded bg-indigo-500 text-white hover:bg-indigo-600 transition-all">
        Invite
       </button>
+      <button
+      onClick={()=>sendReaction("👍")}>
+        👍
+      </button>
     </div>
+
+    <div className="fixed left-5 top-[58%] -translate-y-1/2 z-50">
+      <div className="flex flex-col gap-3 rounded-full bg-slate-500 backdrop-blur-md border border-gray-200 p-2 shadow-xl">
+          {reactions.map((emoji)=>(
+            <button
+            key={emoji}
+            onClick={()=>sendReaction(emoji)}
+            className='w-12 h-12 rounded-full bg-white text-2xl shadow-md hover:scale-110 active:scale-95 transition-all duration-200'>{emoji}</button>
+          ))}
+        </div>
+    </div>
+    </>
   ); 
 }
 

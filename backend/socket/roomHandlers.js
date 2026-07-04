@@ -50,4 +50,9 @@ export function registerRoomHandlers(socket,io){
     socket.on("cursor-move",({x,y,userId,color,name,avatar})=>{
         socket.to(socket.roomId).emit("cursor-move",{x,y,userId,color,name,avatar});
     });
+
+    socket.on("emoji-reaction", ({ userId, emoji,name }) => {
+        console.log("Emoji received:", userId, emoji);
+        socket.to(socket.roomId).emit("emoji-reaction", {userId,emoji,name});
+    });
 }

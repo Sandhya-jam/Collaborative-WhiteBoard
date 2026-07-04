@@ -10,6 +10,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
     const clearRef=useRef();
     const undoRef=useRef();
     const redoRef=useRef();
+    const reactionTimeouts = useRef({});
     //console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
         clearRef.current=clearCanvas;
@@ -27,7 +28,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
         attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef,
             setHistory,setRedoHistory,addModifyOperation);
         attachPresenceListeners(socket,setUsers);
-        attachCursorListeners(socket,setRemoteCursors);
+        attachCursorListeners(socket,setRemoteCursors,reactionTimeouts);
         attachToastListeners(socket,addToast);
 
         socket.on("disconnect", () => {

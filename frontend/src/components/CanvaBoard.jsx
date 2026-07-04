@@ -25,7 +25,8 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [users,setUsers]=useState([]);
     const [tool,setTool]=useState("pencil")
     const [remoteCursors,setRemoteCursors]=useState({});
-
+    const [myReaction,setMyReaction]=useState(null)
+    
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
@@ -71,6 +72,19 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         console.log("EMITTING CLEAR");
         socketRef.current.emit("clear-canvas",{userId});
     };
+
+    const sendReaction=(emoji)=>{
+        setMyReaction(emoji);
+        const userId=user._id
+        socketRef.current.emit("emoji-reaction", {
+            userId,
+            emoji,
+            name:profile.name
+        });
+        setTimeout(() => {
+            setMyReaction(null);
+        }, 2000);
+    }
 
     useEffect(()=>{
         const canvas=canvasRef.current;
@@ -165,6 +179,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         exportPNG={exportPNG}
         copyInvite={copyInvite}
         addToast={addToast}
+        sendReaction={sendReaction}
         />
         <canvas
         ref={canvasRef}
@@ -183,8 +198,14 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         position={textPosition}
         value={textInput}
         setValue={setTextInput}
-        onSubmit={submitText}
-        />
+        onSubmit={submitText}/>
+        {myReaction && (
+            <div
+                className="fixed left-24 top-[58%] text-5xl emojiFloat z-[999] pointer-events-none"
+            >
+                {myReaction}
+            </div>
+        )}
     </div>
   );
 }
