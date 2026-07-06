@@ -1,16 +1,19 @@
 import { useEffect,useRef } from "react";
 import {socket} from "../socket"
+import { getUser } from "../utils/auth";
 import attachDrawingListeners from "./socketListeners/drawingListeners";
 import attachPresenceListeners from "./socketListeners/presenceListeners";
 import attachCursorListeners from "./socketListeners/cursorListeners";
 import attachToastListeners from "./socketListeners/toastListeners";
 
-export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,
-    setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation){
+export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,
+    setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,
+    createOffer,createAnswer,micOn,remoteAudioRef){
     const clearRef=useRef();
     const undoRef=useRef();
     const redoRef=useRef();
     const reactionTimeouts = useRef({});
+    const negotiationStarted = useRef(false);
     //console.log("USESOCKET HOOK RUNNING");
     useEffect(()=>{
         clearRef.current=clearCanvas;
@@ -27,9 +30,9 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
 
         attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef,
             setHistory,setRedoHistory,addModifyOperation);
-        attachPresenceListeners(socket,setUsers);
+        attachPresenceListeners(socket,setUsers,createPeerConnection,peerConnections,createOffer,createAnswer,remoteAudioRef);
         attachCursorListeners(socket,setRemoteCursors,reactionTimeouts);
-        attachToastListeners(socket,addToast);
+        attachToastListeners(socket,addToast,peerConnections);
 
         socket.on("disconnect", () => {
             console.log("DISCONNECTED");
@@ -51,6 +54,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             socket.off("cursor-remove");
             socket.off("user-joined");
             socket.off("user-left");
+            socket.off("voice-offer");
             socket.off("disconnect");
         };
     },[]);

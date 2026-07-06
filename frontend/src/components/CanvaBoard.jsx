@@ -5,6 +5,7 @@ import useCanvas from '../hooks/useCanvas'
 import { drawAll } from '../utils/drawUtils'
 import useSocket from '../hooks/useSocket'
 import {getUser} from '../utils/auth' 
+import {socket} from "../socket"
 import RemoteCursors from './RemoteCursors'
 import useCursor from '../hooks/useCursor'
 import Users from './Users'
@@ -16,6 +17,7 @@ import useProfile from '../hooks/useProfile';
 import useTextTool from '../hooks/useTextTool';
 import TextInput from './TextInput';
 import useSelection from '../hooks/useSelection';
+import audioAcess from '../utils/audioAcess'
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const firstLoad=useRef(null)
@@ -26,12 +28,15 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [tool,setTool]=useState("pencil")
     const [remoteCursors,setRemoteCursors]=useState({});
     const [myReaction,setMyReaction]=useState(null)
-    
+    const remoteAudioRef=useRef(null);
+
+    const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket})
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
-    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,setUsers,setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation);
+    const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
+        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef);
     const profile=useProfile();
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();
@@ -40,6 +45,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
         setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id);
     
+
     const handleUndo=()=>{
         if(!socketRef.current) return;
 
@@ -124,13 +130,17 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     },[darkMode,actions,currentPath,preview,remotePaths,tool,selectedId]);
     
     useEffect(() => {
-        if(roomId && socketRef.current){
-            console.log("JOINING ROOM:",roomId);
-            const userId=user?._id;
-            const userName=user?.name;
-            const userEmail=user?.email;
-            socketRef.current.emit("join-room", {roomId,userId,userName,userEmail});
+        const AudioPer=async()=>{
+            if(roomId && socketRef.current){
+                console.log("JOINING ROOM:",roomId);
+                const userId=user?._id;
+                const userName=user?.name;
+                const userEmail=user?.email;
+                await initializeAudio();
+                socketRef.current.emit("join-room", {roomId,userId,userName,userEmail});
+            }
         }
+        AudioPer();
     }, [roomId]);
 
     useEffect(()=>{
@@ -161,6 +171,19 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         return ()=>window.removeEventListener("keydown",handleDelete);
     },[selectedId]);
     
+    useEffect(()=>{
+        if(!remoteStream || !remoteAudioRef.current) return;
+        console.log("Remote Stream Changed:", remoteStream);
+        remoteAudioRef.current.srcObject=remoteStream;
+        remoteAudioRef.current
+    .play()
+    .then(() => {
+        console.log("Audio Playing ✅");
+    })
+    .catch(err => {
+        console.error("Play Error", err);
+    });
+    },[remoteStream,remoteAudioRef]);
   return (
     <div>
         <Users users={users}/>
@@ -180,6 +203,9 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         copyInvite={copyInvite}
         addToast={addToast}
         sendReaction={sendReaction}
+        micOn={micOn}
+        setMicOn={setMicOn}
+        toggleMic={toggleMic}
         />
         <canvas
         ref={canvasRef}
@@ -206,6 +232,12 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 {myReaction}
             </div>
         )}
+        <audio
+        ref={remoteAudioRef}
+        autoPlay
+        playsInline
+        hidden
+        />
     </div>
   );
 }

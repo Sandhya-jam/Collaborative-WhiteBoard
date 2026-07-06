@@ -55,4 +55,41 @@ export function registerRoomHandlers(socket,io){
         console.log("Emoji received:", userId, emoji);
         socket.to(socket.roomId).emit("emoji-reaction", {userId,emoji,name});
     });
+
+    socket.on("voice-offer",({targetUserId,senderUserId,offer})=>{
+        const users=roomUsers.get(socket.roomId);
+        const targetUser=users.get(targetUserId);
+        targetUser?.sockets?.forEach(socketId=>{
+            io.to(socketId).emit("voice-offer",{
+                senderUserId,
+                offer
+            });
+        });
+    });
+
+    socket.on("voice-answer",({targetUserId,senderUserId,answer})=>{
+        const users=roomUsers.get(socket.roomId);
+        if(!users) return;
+        const targetUser=users.get(targetUserId);
+        if(!targetUser) return;
+
+        targetUser?.sockets?.forEach(socketId=>{
+            io.to(socketId).emit("voice-answer",{
+                senderUserId,
+                answer
+            });
+        });
+    });
+
+    socket.on("ice-candidate",({targetUserId,senderUserId,candidate})=>{
+        const users=roomUsers.get(socket.roomId)
+        if(!users) return;
+
+        const targetUser=users.get(targetUserId);
+        if(!targetUser) return;
+
+        targetUser.sockets.forEach(socketId=>{
+            io.to(socketId).emit("ice-candidate",{senderUserId,candidate});
+        })
+    });
 }

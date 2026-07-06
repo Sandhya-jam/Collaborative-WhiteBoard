@@ -2,8 +2,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash,faLocationArrow,faTextHeight} from '@fortawesome/free-solid-svg-icons'
 import Tooltip from './tooltip';
 import { useState } from 'react';
+
 const Toolbar = ({color,setColor,brushSize,setBrushSize,clearCanvas,tool,setTool,darkMode,
-  setDarkMode,undo,redo,exportPNG,copyInvite,addToast,sendReaction}) => {
+  setDarkMode,undo,redo,exportPNG,copyInvite,addToast,sendReaction,micOn,setMicOn,toggleMic}) => {
     const baseBtn="relative overflow-hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90";
     const active="bg-blue-500 text-white shadow-md scale-105";
     const inactive="bg-white text-gray-700 hover:bg-gray-200 hover:scale-105";
@@ -101,8 +102,8 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,clearCanvas,tool,setTool
        Invite
       </button>
       <button
-      onClick={()=>sendReaction("👍")}>
-        👍
+      onClick={toggleMic}>
+        {micOn?"🎙️":"🔇"}
       </button>
     </div>
 
