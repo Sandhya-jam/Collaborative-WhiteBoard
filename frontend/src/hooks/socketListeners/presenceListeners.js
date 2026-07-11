@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { getUser } from "../../utils/auth";
-const attachPresenceListeners=(socket,setUsers,createPeerConnection,peerConnections,createOffer,createAnswer,remoteAudioRef)=>{
+const attachPresenceListeners=(socket,setUsers,createPeerConnection,peerConnections,createOffer,
+    createAnswer,remoteAudioRef,setMicStates)=>{
     socket.off("users-update");
     socket.off("voice-offer");
 
@@ -71,6 +72,13 @@ const attachPresenceListeners=(socket,setUsers,createPeerConnection,peerConnecti
 
         await pc.addIceCandidate(candidate);
         console.log("ICE Added");
+    });
+
+    socket.on("mic-status-update",({userId,micOn})=>{
+        setMicStates(prev=>({
+            ...prev,
+            [userId]:micOn
+        }))
     });
 }
 

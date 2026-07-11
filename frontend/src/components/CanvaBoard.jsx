@@ -19,6 +19,7 @@ import TextInput from './TextInput';
 import useSelection from '../hooks/useSelection';
 import audioAcess from '../utils/audioAcess'
 import DeleteCanvas from './DeleteCanvas'
+import VoicePanel from './Voice/VoicePanel'
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const firstLoad=useRef(null)
@@ -31,14 +32,16 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [myReaction,setMyReaction]=useState(null)
     const remoteAudioRef=useRef(null);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
+    const [showVoicePanel, setShowVoicePanel] = useState(true);
+    const [micStates, setMicStates] = useState({});
 
-    const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket})
+    const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket,setMicStates})
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
-        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef);
+        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates);
     const profile=useProfile();
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();
@@ -133,7 +136,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 const userName=user?.name;
                 const userEmail=user?.email;
                 await initializeAudio();
-                socketRef.current.emit("join-room", {roomId,userId,name:userName,mail:userEmail});
+                socketRef.current.emit("join-room", {roomId,userId,name:userName,mail:userEmail,micOn:micOn});
             }
         }
         AudioPer();
@@ -183,25 +186,12 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
   return (
     <div>
         <Users users={users}/>
-        <Toolbar
-        color={color}
-        setColor={setColor}
-        brushSize={brushSize}
-        setBrushSize={setBrushSize}
-        setOpenDeleteModal={setOpenDeleteModal}
-        tool={tool}
-        setTool={setTool}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-        undo={handleUndo}
-        redo={handleRedo}
-        exportPNG={exportPNG}
-        copyInvite={copyInvite}
-        addToast={addToast}
-        sendReaction={sendReaction}
-        micOn={micOn}
-        setMicOn={setMicOn}
-        toggleMic={toggleMic}
+        <Toolbar color={color} setColor={setColor} brushSize={brushSize}
+        setBrushSize={setBrushSize} setOpenDeleteModal={setOpenDeleteModal} tool={tool}
+        setTool={setTool} darkMode={darkMode} setDarkMode={setDarkMode}
+        undo={handleUndo} redo={handleRedo} exportPNG={exportPNG}
+        copyInvite={copyInvite} addToast={addToast} sendReaction={sendReaction}
+        micOn={micOn} setMicOn={setMicOn} toggleMic={toggleMic}
         />
         <canvas
         ref={canvasRef}
@@ -214,11 +204,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
         />
-        <DeleteCanvas
-        open={openDeleteModal}
-        onCancel={() => setOpenDeleteModal(false)}
-        onConfirm={handleClear}
-        />
+        <DeleteCanvas open={openDeleteModal} onCancel={() => setOpenDeleteModal(false)} onConfirm={handleClear}/>
         <RemoteCursors remoteCursors={remoteCursors} />
         <Toasts toasts={toasts} />
         <TextInput
@@ -227,9 +213,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         setValue={setTextInput}
         onSubmit={submitText}/>
         {myReaction && (
-            <div
-                className="fixed left-24 top-[58%] text-5xl emojiFloat z-[999] pointer-events-none"
-            >
+            <div className="fixed left-24 top-[58%] text-5xl emojiFloat z-[999] pointer-events-none">
                 {myReaction}
             </div>
         )}
@@ -239,8 +223,19 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         playsInline
         hidden
         />
+        {showVoicePanel && (
+        <VoicePanel
+        users={users}
+        micStates={micStates}
+        onClose={() => setShowVoicePanel(false)}/>)}
+        {!showVoicePanel && (
+        <button
+        onClick={() => setShowVoicePanel(true)}
+        className="absolute top-20 right-5 bg-surface border border-border rounded-full px-4 py-2 shadow-lg text-white">
+        🎙 Voice</button>
+        )}
     </div>
   );
 }
 
-export default CanvaBoard
+export default CanvaBoard;

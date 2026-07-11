@@ -1,5 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash,faLocationArrow,faTextHeight} from '@fortawesome/free-solid-svg-icons'
+import {FiMic,FiMicOff} from "react-icons/fi"
 import Tooltip from './tooltip';
 import { useState } from 'react';
 
@@ -82,8 +83,8 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,setOpenDeleteModal,tool,
       title='Toggle Theme'>
          {darkMode?"☀️":"🌙"}
       </button>
-      <button onClick={undo}>Undo</button>
-      <button onClick={redo}>Redo</button>
+      <button className="hover:bg-gray-200 hover:scale-105 h-8 w-12 hover:rounded transition" onClick={undo}>Undo</button>
+      <button className="hover:bg-gray-200 hover:scale-105 h-8 w-12 hover:rounded transition" onClick={redo}>Redo</button>
       <button onClick={()=>setTool("select")}
         className={`${baseBtn} ${tool==="select"?active:inactive}`}>
         <FontAwesomeIcon icon={faLocationArrow}/>
@@ -102,8 +103,8 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,setOpenDeleteModal,tool,
        Invite
       </button>
       <button
-      onClick={toggleMic}>
-        {micOn?"🎙️":"🔇"}
+      onClick={()=>toggleMic()}>
+        {micOn?<FiMic size={18} className='text-green-400'/>:<FiMicOff size={18}/>}
       </button>
     </div>
 

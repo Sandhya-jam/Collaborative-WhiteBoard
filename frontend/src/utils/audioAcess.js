@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { getUser } from "./auth";
-const audioAcess = ({socket}) => {
+const audioAcess = ({socket,setMicStates}) => {
   const [micOn,setMicOn]=useState(false);
   const [remoteStream, setRemoteStream] = useState(null);
   const localAudioStream=useRef(null);
@@ -41,6 +41,13 @@ const audioAcess = ({socket}) => {
     const track = localAudioStream.current.getAudioTracks()[0];
     track.enabled = !track.enabled;
     setMicOn(track.enabled);
+    setMicStates(prev=>({
+        ...prev,
+        [getUser()._id]:track.enabled
+    }));
+    socket.emit("mic-status",{
+        micOn:track.enabled
+    });
     console.log(
         track.enabled ? "Mic ON" : "Mic OFF"
     );

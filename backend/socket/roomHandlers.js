@@ -16,6 +16,7 @@ export function registerRoomHandlers(socket,io){
                 userId,
                 name,
                 email,
+                micOn:false,
                 sockets:new Set()
             });
         }
@@ -91,5 +92,18 @@ export function registerRoomHandlers(socket,io){
         targetUser.sockets.forEach(socketId=>{
             io.to(socketId).emit("ice-candidate",{senderUserId,candidate});
         })
+    });
+
+    socket.on("mic-status",({micOn})=>{
+        const users=roomUsers.get(socket.roomId);
+        if(!users) return;
+        const user=users.get(socket.userId);
+        if(!user) return;
+
+        user.micOn=micOn;
+        io.to(socket.roomId).emit("mic-status-update",{
+            userId:socket.userId,
+            micOn
+        });
     });
 }
