@@ -2,12 +2,12 @@ export default function attachToastListeners(socket,addToast,peerConnections,){
     socket.off("user-joined");
     socket.off("user-left");
 
-    socket.on("user-joined",(userId)=>{
-        addToast(`${userId.slice(0,5)} joined`,"join");
+    socket.on("user-joined", ({ name }) => {
+        addToast(`${name} joined`, "join");
     });
 
-    socket.on("user-left",(userId)=>{
-        addToast(`${userId.slice(0,5)} left`,"leave");
+    socket.on("user-left",({name})=>{
+        addToast(`${name} left`,"leave");
         console.log("User Left:",userId);
         const pc=peerConnections.current[userId];
         if(!pc) return;

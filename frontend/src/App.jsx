@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import ProtectRoute from "./components/ProtectRoute";
 
 const App = () => {
   const [darkMode,setDarkMode]=useState(false);
@@ -17,11 +18,13 @@ const App = () => {
         <div className="w-screen h-screen bg-gray-100 dark:bg-gray-900 transition-all duration-300">
           <Routes>
             <Route path="/join"element={<JoinRoom darkMode={darkMode} setDarkMode={setDarkMode}/>}/>
-            <Route path="/room/:roomId" element={<RoomPage darkMode={darkMode} setDarkMode={setDarkMode}/>}/>
+            <Route path="/room/:roomId" element={<ProtectRoute>
+              <RoomPage darkMode={darkMode} setDarkMode={setDarkMode}/>
+              </ProtectRoute>}/>
             <Route path='/' element={<Landing/>} />
             <Route path='/login' element={<Login/>} />
             <Route path='/signup' element={<Signup/>} />
-            <Route path='/dashboard' element={<Dashboard/>} />
+            <Route path='/dashboard' element={<ProtectRoute><Dashboard/></ProtectRoute>} />
           </Routes>
         </div>
       </div>

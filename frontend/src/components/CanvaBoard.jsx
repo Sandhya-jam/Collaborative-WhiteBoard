@@ -18,6 +18,7 @@ import useTextTool from '../hooks/useTextTool';
 import TextInput from './TextInput';
 import useSelection from '../hooks/useSelection';
 import audioAcess from '../utils/audioAcess'
+import DeleteCanvas from './DeleteCanvas'
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
     const firstLoad=useRef(null)
@@ -29,6 +30,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [remoteCursors,setRemoteCursors]=useState({});
     const [myReaction,setMyReaction]=useState(null)
     const remoteAudioRef=useRef(null);
+    const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
     const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket})
     const {copyInvite}=useInvite(roomId);
@@ -67,16 +69,10 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     
     const handleClear=()=>{
         if (!socketRef?.current) return;
-        const confirmed =
-        window.confirm(
-            "Clear your drawings?"
-        );
-        if (!confirmed) return;
-        const userId=user._id
-        console.log("CLEAR CLICKED", userId);
+        const userId = user._id;
         clearCanvas(userId);
-        console.log("EMITTING CLEAR");
-        socketRef.current.emit("clear-canvas",{userId});
+        socketRef.current.emit("clear-canvas", { userId });
+        setOpenDeleteModal(false);
     };
 
     const sendReaction=(emoji)=>{
@@ -137,7 +133,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 const userName=user?.name;
                 const userEmail=user?.email;
                 await initializeAudio();
-                socketRef.current.emit("join-room", {roomId,userId,userName,userEmail});
+                socketRef.current.emit("join-room", {roomId,userId,name:userName,mail:userEmail});
             }
         }
         AudioPer();
@@ -192,7 +188,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         setColor={setColor}
         brushSize={brushSize}
         setBrushSize={setBrushSize}
-        clearCanvas={handleClear}
+        setOpenDeleteModal={setOpenDeleteModal}
         tool={tool}
         setTool={setTool}
         darkMode={darkMode}
@@ -217,6 +213,11 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
         }}
         onMouseUp={stopDrawing}
         onMouseLeave={stopDrawing}
+        />
+        <DeleteCanvas
+        open={openDeleteModal}
+        onCancel={() => setOpenDeleteModal(false)}
+        onConfirm={handleClear}
         />
         <RemoteCursors remoteCursors={remoteCursors} />
         <Toasts toasts={toasts} />

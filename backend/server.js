@@ -48,7 +48,7 @@ io.on("connection",(socket)=>{
         //Remove user
         if(user.sockets.size==0){
             users.delete(userId);
-            socket.to(roomId).emit("user-left",userId);
+            socket.to(roomId).emit("user-left",{name:user.name});
         }
         //Remove room if empty
         if(users.size===0){

@@ -1,4 +1,5 @@
 import {motion} from "framer-motion"
+import board from "../../assets/board.png"
 
 const Preview = () => {
   return (
@@ -17,7 +18,7 @@ const Preview = () => {
                 <div className="w-3 h-3 rounded-full bg-green-500"/>
             </div>
             <div className="text-center mb-12">
-                <span className="px-4 py-2 rounded-full bg-primary text-primary">
+                <span className="px-4 py-2 rounded-full bg-primary text-black">
                     Product Review
                 </span>
                 <h2 className="text-5xl font-bold mt-6">
@@ -28,14 +29,14 @@ const Preview = () => {
                 </p>
             </div>
             {/* SS */}
-            {/* <img
-                src={preview}
-                alt="Whiteboard Preview"
-                className="w-full object-cover"
-            /> */}
-            <div className="h-[600px] flex items-center justify-center text-muted text-xl">
+            <img
+                src={board}
+                alt="Collaborative Whiteboard Preview"
+                className="w-full rounded-2xl border border-white/10 shadow-2xl object-contain"
+            />
+            {/* <div className="h-[600px] flex items-center justify-center text-muted text-xl">
                 WhiteBoard Preview Coming Soon
-            </div>
+            </div> */}
             </motion.div>
         </div>
     </section>

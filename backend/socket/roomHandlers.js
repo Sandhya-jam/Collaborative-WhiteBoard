@@ -21,7 +21,7 @@ export function registerRoomHandlers(socket,io){
         }
         users.get(userId).sockets.add(socket.id);
 
-        socket.to(roomId).emit("user-joined",userId);
+        socket.to(roomId).emit("user-joined",{name:users.get(userId).name});
         io.to(roomId).emit("users-update",[...users.values()].map(user=>({
             userId:user.userId,
             name:user.name,

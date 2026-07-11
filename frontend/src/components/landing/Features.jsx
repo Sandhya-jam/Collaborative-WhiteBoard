@@ -1,4 +1,4 @@
-import { FiUsers,FiZap,FiClock } from "react-icons/fi";
+import { FiUsers,FiMic,FiSmile} from "react-icons/fi";
 import FeatureCard from "./FeatureCard";
 
 const Features = () => {
@@ -18,15 +18,15 @@ const Features = () => {
         description="Collaborate with teammates instantly using WebSockets with synchronized drawing and editing."
         />
         <FeatureCard
-        icon={<FiZap/>}
-        title="AI Beautifier"
-        description="Convert rough sketches into clean professional diagrams with AI assistance."
-        />
-        <FeatureCard
-        icon={<FiClock/>}
-        title="Version History"
-        description="Restore previous versions of your whiteboard anytime without losing your work."
-        />
+          icon={<FiMic />}
+          title="Real-time Voice Chat"
+          description="Communicate seamlessly with collaborators using built-in low-latency voice chat while working together"
+      />
+      <FeatureCard
+          icon={<FiSmile />}
+          title="Live Emoji Reactions"
+          description="Express ideas instantly with real-time floating emoji reactions for engaging collaboration."
+      />
     </div>
     </section>
   )

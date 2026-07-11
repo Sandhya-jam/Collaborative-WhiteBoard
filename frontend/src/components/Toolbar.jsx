@@ -3,7 +3,7 @@ import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash,faLocationA
 import Tooltip from './tooltip';
 import { useState } from 'react';
 
-const Toolbar = ({color,setColor,brushSize,setBrushSize,clearCanvas,tool,setTool,darkMode,
+const Toolbar = ({color,setColor,brushSize,setBrushSize,setOpenDeleteModal,tool,setTool,darkMode,
   setDarkMode,undo,redo,exportPNG,copyInvite,addToast,sendReaction,micOn,setMicOn,toggleMic}) => {
     const baseBtn="relative overflow-hidden w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200 active:scale-90";
     const active="bg-blue-500 text-white shadow-md scale-105";
@@ -69,7 +69,7 @@ const Toolbar = ({color,setColor,brushSize,setBrushSize,clearCanvas,tool,setTool
       />
       {/* Clear */}
       <button
-        onClick={clearCanvas}
+        onClick={() => setOpenDeleteModal(true)}
         title='Clear Board'
         className={`${baseBtn} bg-red-500 text-white hover:bg-red-600`}
         >
