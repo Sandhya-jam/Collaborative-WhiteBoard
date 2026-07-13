@@ -11,6 +11,7 @@ import { registerRoomHandlers } from "./socket/roomHandlers.js"
 import authRoutes from './routes/authRoutes.js'
 import roomRoutes from './routes/roomRoutes.js'
 
+dotenv.config();
 const app=express();
 app.use(cors({
     origin: process.env.CLIENT_URL,
@@ -18,7 +19,6 @@ app.use(cors({
 }));
 app.use(express.json());
 
-dotenv.config();
 connectDB();
 //app.use(express.json());
 const server=http.createServer(app);

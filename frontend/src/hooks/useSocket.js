@@ -1,5 +1,5 @@
 import { useEffect,useRef } from "react";
-import {socket} from "../socket"
+import {socket} from "../socket";
 import { getUser } from "../utils/auth";
 import attachDrawingListeners from "./socketListeners/drawingListeners";
 import attachPresenceListeners from "./socketListeners/presenceListeners";
