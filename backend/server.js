@@ -70,6 +70,9 @@ io.on("connection",(socket)=>{
     });
 });
 
+app.get("/", (req,res)=>{
+    res.send("WhiteFlow Backend Running 🚀");
+});
 app.use('/api/auth',authRoutes)
 app.use('/api/rooms',roomRoutes);
 
