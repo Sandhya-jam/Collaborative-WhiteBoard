@@ -12,7 +12,10 @@ import authRoutes from './routes/authRoutes.js'
 import roomRoutes from './routes/roomRoutes.js'
 
 const app=express();
-app.use(cors());
+app.use(cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+}));
 app.use(express.json());
 
 dotenv.config();
@@ -20,9 +23,10 @@ connectDB();
 //app.use(express.json());
 const server=http.createServer(app);
 //Creates a WebSocket server & Attaches it to HTTP server
-const io=new Server(server,{
+const io = new Server(server,{
     cors:{
-        origin:"*",
+        origin: process.env.CLIENT_URL,
+        credentials: true,
     },
 });
 //Why CORS here too?
