@@ -1,4 +1,4 @@
-const textInput = ({position,value,setValue,onSubmit}) => {
+const TextInput = ({position,value,setValue,onSubmit}) => {
     if(!position) return null;
   return (
     <input
@@ -19,4 +19,4 @@ const textInput = ({position,value,setValue,onSubmit}) => {
   );
 }
 
-export default textInput
+export default TextInput
