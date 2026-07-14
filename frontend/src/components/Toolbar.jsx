@@ -1,7 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faPencil,faSlash,faTimesRectangle,faSquare,faCircle,faTrash,faLocationArrow,faTextHeight} from '@fortawesome/free-solid-svg-icons'
 import {FiMic,FiMicOff} from "react-icons/fi"
-import Tooltip from './tooltip';
+import Tooltip from './Tooltip';
 import { useState } from 'react';
 
 const Toolbar = ({color,setColor,brushSize,setBrushSize,setOpenDeleteModal,tool,setTool,darkMode,
