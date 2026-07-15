@@ -34,14 +34,15 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [showVoicePanel, setShowVoicePanel] = useState(true);
     const [micStates, setMicStates] = useState({});
-
+    const roomLoaded = useRef(false);
+    const loadingRoom = useRef(true);
     const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket,setMicStates})
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
-        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates);
+        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,roomLoaded,loadingRoom);
     const profile=useProfile();
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();
@@ -143,21 +144,18 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     }, [roomId]);
 
     useEffect(()=>{
-        if(firstLoad.current){
-            firstLoad.current=false
-            return;
-        }
-        const timer=setTimeout(()=>{
-            socketRef.current?.emit("persist-object",
-                {
-                    actions,
-                    history,
-                    redoHistory
-                }
-            );
-        },300);
-        return()=>clearTimeout(timer);
-    },[actions])
+        if (!roomLoaded.current || loadingRoom.current) return;
+
+        const timer = setTimeout(() => {
+            socketRef.current?.emit("persist-object", {
+                actions,
+                history,
+                redoHistory,
+            });
+        }, 300);
+
+        return () => clearTimeout(timer);
+    },[actions,history,redoHistory])
     
     useEffect(()=>{
         const handleDelete=(e)=>{

@@ -1,5 +1,5 @@
 export default function attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,
-    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation){
+    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom){
     socket.off("draw-action");
     socket.off("draw-start");
     socket.off("draw-move");
@@ -69,9 +69,17 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
 
     socket.on("load-room",({actions,history,redoHistory})=>{
         console.log("ROOM LOADED",actions.length);
+        loadingRoom.current = true;
+
         setActions(actions);
-        setHistory(history||[])
-        setRedoHistory(redoHistory||[])
+        setHistory(history || []);
+        setRedoHistory(redoHistory || []);
+
+        roomLoaded.current = true;
+
+        setTimeout(() => {
+            loadingRoom.current = false;
+        }, 0);
     });
 
     socket.on("update-object",({id,updates})=>{
