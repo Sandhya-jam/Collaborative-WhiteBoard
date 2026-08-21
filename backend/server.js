@@ -13,19 +13,32 @@ import roomRoutes from './routes/roomRoutes.js'
 
 dotenv.config();
 const app=express();
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.CLIENT_URL
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL,
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true,
 }));
-app.use(express.json());
 
 connectDB();
 //app.use(express.json());
 const server=http.createServer(app);
 //Creates a WebSocket server & Attaches it to HTTP server
-const io = new Server(server,{
-    cors:{
-        origin: process.env.CLIENT_URL,
+const io = new Server(server, {
+    cors: {
+        origin: [
+            "http://localhost:5173",
+            process.env.CLIENT_URL
+        ],
         credentials: true,
     },
 });

@@ -137,7 +137,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 const userName=user?.name;
                 const userEmail=user?.email;
                 await initializeAudio();
-                socketRef.current.emit("join-room", {roomId,userId,name:userName,mail:userEmail,micOn:micOn});
+                socketRef.current.emit("join-room", {roomId,userId,name:userName,email:userEmail,micOn:micOn});
             }
         }
         AudioPer();
