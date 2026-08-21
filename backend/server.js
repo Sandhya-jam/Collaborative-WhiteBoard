@@ -13,9 +13,6 @@ import roomRoutes from './routes/roomRoutes.js'
 
 dotenv.config();
 const app=express();
-
-connectDB();
-app.use(express.json());
 const allowedOrigins = [
     "http://localhost:5173",
     process.env.CLIENT_URL
@@ -80,7 +77,8 @@ io.on("connection",(socket)=>{
         console.log("User disconnected:",socket.id);
     });
 });
-
+connectDB();
+app.use(express.json());
 app.get("/", (req,res)=>{
     res.send("WhiteFlow Backend Running 🚀");
 });
