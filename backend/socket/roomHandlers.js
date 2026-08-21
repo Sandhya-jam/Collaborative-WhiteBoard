@@ -44,7 +44,8 @@ export function registerRoomHandlers(socket,io){
         socket.emit("load-room",{
             actions:room.actions,
             history:room.history,
-            redoHistory:room.redoHistory
+            redoHistory:room.redoHistory,
+            version:room.version
         });
     });
 

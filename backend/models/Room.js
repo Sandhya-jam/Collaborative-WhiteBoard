@@ -7,7 +7,8 @@ const roomSchema=new mongoose.Schema({
     collaborators:[{type:mongoose.Schema.Types.ObjectId,required:true}],
     actions:{type:Array,default:[]},
     history:{type:Array,default:[]},
-    redoHistory:{type:Array,default:[]}
+    redoHistory:{type:Array,default:[]},
+    version:{type:Number,default:1},
 });
 
 export default mongoose.model('Room',roomSchema);

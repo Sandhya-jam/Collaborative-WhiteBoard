@@ -34,6 +34,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [showVoicePanel, setShowVoicePanel] = useState(true);
     const [micStates, setMicStates] = useState({});
+    const [roomVersion,setRoomVersion]=useState(1);
     const roomLoaded = useRef(false);
     const loadingRoom = useRef(true);
     const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket,setMicStates})
@@ -42,7 +43,8 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {toasts,addToast}=useToast();
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
-        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,roomLoaded,loadingRoom);
+        setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,
+        roomLoaded,loadingRoom,roomVersion,setRoomVersion);
     const profile=useProfile();
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();
@@ -50,7 +52,6 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(user._id,color,addAction,sendAction);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
         setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id);
-    
 
     const handleUndo=()=>{
         if(!socketRef.current) return;
@@ -151,11 +152,11 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 actions,
                 history,
                 redoHistory,
+                version: roomVersion
             });
         }, 300);
-
         return () => clearTimeout(timer);
-    },[actions,history,redoHistory])
+    },[actions,history,redoHistory,roomVersion]);
     
     useEffect(()=>{
         const handleDelete=(e)=>{

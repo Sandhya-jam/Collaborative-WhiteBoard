@@ -8,7 +8,7 @@ import attachToastListeners from "./socketListeners/toastListeners";
 
 export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,
     setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,
-    createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,roomLoaded,loadingRoom){
+    createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,roomLoaded,loadingRoom,roomVersion,setRoomVersion){
     const clearRef=useRef();
     const undoRef=useRef();
     const redoRef=useRef();
@@ -29,7 +29,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
         });
 
         attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef,
-            setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom);
+            setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion);
         attachPresenceListeners(socket,setUsers,createPeerConnection,peerConnections,createOffer,createAnswer,remoteAudioRef,setMicStates);
         attachCursorListeners(socket,setRemoteCursors,reactionTimeouts);
         attachToastListeners(socket,addToast,peerConnections);
@@ -49,6 +49,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             socket.off("redo");
             socket.off("clear-canvas");
             socket.off("load-room");
+            socket.off("persist-success");
             socket.off("users-update");
             socket.off("cursor-move");
             socket.off("cursor-remove");

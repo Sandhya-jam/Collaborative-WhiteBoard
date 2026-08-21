@@ -1,5 +1,5 @@
 export default function attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,
-    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom){
+    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion){
     socket.off("draw-action");
     socket.off("draw-start");
     socket.off("draw-move");
@@ -8,6 +8,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
     socket.off("redo");
     socket.off("clear-canvas");
     socket.off("load-room");
+    socket.off("persist-success");
     socket.off("update-object");
     socket.on("draw-action",(action)=>{
         if(action.type!=="pencil"){
@@ -67,19 +68,24 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         clearRef.current?.(userId);
     });
 
-    socket.on("load-room",({actions,history,redoHistory})=>{
+    socket.on("load-room",({actions,history,redoHistory,version})=>{
         console.log("ROOM LOADED",actions.length);
         loadingRoom.current = true;
 
         setActions(actions);
         setHistory(history || []);
         setRedoHistory(redoHistory || []);
-
+        setRoomVersion(version);
         roomLoaded.current = true;
 
         setTimeout(() => {
             loadingRoom.current = false;
         }, 0);
+    });
+
+    socket.on("persist-success",({version})=>{
+        console.log("PERSIST SUCCESS, NEW VERSION:",version);
+        setRoomVersion(version);
     });
 
     socket.on("update-object",({id,updates})=>{

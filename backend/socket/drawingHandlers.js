@@ -30,15 +30,37 @@ export function registerDrawingHandlers(socket){
         );
     });
 
-    socket.on("persist-object",async({actions,history,redoHistory})=>{
-        await Room.findOneAndUpdate(
-            {roomId:socket.roomId},
-            {
-                actions,
-                history,
-                redoHistory
-            },
-        );
-        console.log("ROOM PERSISTED");
+    socket.on("persist-object",async({actions,history,redoHistory,version})=>{
+        try{
+            const room=await Room.findOneAndUpdate(
+                {
+                    roomId:socket.roomId,
+                    version:version
+                },
+                {
+                    actions,
+                    history,
+                    redoHistory,
+                    $inc:{version:1}
+                },{
+                    new:true
+                }
+            );
+            if(!room){
+                console.log("STALE ROOM VERSION, NOT PERSISTING");
+                const latestRoom=await Room.findOne({roomId:socket.roomId});
+                socket.to(socket.roomId).emit("load-room",{
+                    actions:latestRoom.actions,
+                    history:latestRoom.history,
+                    redoHistory:latestRoom.redoHistory,
+                    version:latestRoom.version
+                });
+                return;
+            }
+            console.log("ROOM PERSISTED, NEW VERSION:",room.version);
+            socket.to(socket.roomId).emit("persist-success",{version:room.version});
+        }catch(err){
+            console.error("ERROR PERSISTING ROOM:",err);
+        }
     });
 }
