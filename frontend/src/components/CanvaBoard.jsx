@@ -156,7 +156,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             });
         }, 300);
         return () => clearTimeout(timer);
-    },[actions,history,redoHistory,roomVersion]);
+    },[actions,history,redoHistory]);
     
     useEffect(()=>{
         const handleDelete=(e)=>{
