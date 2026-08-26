@@ -3,7 +3,7 @@ import {getUser} from "../utils/auth";
 import {hitTest} from "../utils/hitTest";
 
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
-    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId) {
+    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -260,6 +260,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             width: brushSize,
             userId:userId
         };
+        dirtyRef.current = true;
         addAction(pencilAction);
         if (!socketRef?.current) return;
         console.log("DRAW END",pencilAction);
@@ -275,6 +276,7 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         }
 
         if(action){
+            dirtyRef.current = true;
             addAction(action);//local update
             //console.log("Sending action:", action)
             sendAction(action);//send to server

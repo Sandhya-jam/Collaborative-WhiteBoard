@@ -70,6 +70,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
 
     socket.on("load-room",({actions,history,redoHistory,version})=>{
         console.log("ROOM LOADED",actions.length);
+        console.log("ROOM VERSION:", version);
         loadingRoom.current = true;
 
         setActions(actions);

@@ -1,5 +1,5 @@
 import { useState } from "react";
-export default function useTextTool(userId,color,addAction,sendAction){
+export default function useTextTool(userId,color,addAction,sendAction,dirtyRef){
     const [textInput,setTextInput]=useState("");
     const [textPosition,setTextPosition]=useState(null);
 
@@ -19,6 +19,7 @@ export default function useTextTool(userId,color,addAction,sendAction){
             color,
             userId
         };
+        dirtyRef.current = true;
         addAction(action);
         sendAction(action);
         setTextInput("");

@@ -1,6 +1,6 @@
 import { useCallback, useState,useEffect, act} from "react";
 
-export default function useHistory(){
+export default function useHistory(dirtyRef){
     const [actions,setActions]=useState([]);
     const [redoStack,setRedoStack]=useState([]);
     const [history,setHistory]=useState([]);
@@ -31,6 +31,7 @@ export default function useHistory(){
     };
 
     const undo=useCallback((userId)=>{
+        dirtyRef.current = true;
         console.log("UNDO CALLED ON CLIENT:", userId);
         setHistory(prevHistory=>{
             for(let i=prevHistory.length-1;i>=0;i--){
@@ -75,6 +76,7 @@ export default function useHistory(){
     },[]);
     
     const redo=useCallback((userId)=>{
+        dirtyRef.current = true;
         setRedoHistory(prevRedo=>{
             for(let i=prevRedo.length-1;i>=0;i--){
                 const op=prevRedo[i];
@@ -118,6 +120,7 @@ export default function useHistory(){
     
     const clearCanvas=useCallback((userId)=>{
         console.log("CLEAR FN CALLED");
+        dirtyRef.current = true;
         // if(actions.length==0) return;
         setActions(prev=>{
             const removeObj=prev.filter(

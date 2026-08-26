@@ -22,7 +22,7 @@ import DeleteCanvas from './DeleteCanvas'
 import VoicePanel from './Voice/VoicePanel'
 const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const canvasRef=useRef(null)
-    const firstLoad=useRef(null)
+    const dirtyRef=useRef(false)
     const [color,setColor]=useState("#000000")
     const [brushSize,setBrushSize]=useState(3)
     const [remotePaths,setRemotePaths]=useState({});
@@ -41,7 +41,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {copyInvite}=useInvite(roomId);
     const {exportPNG}=useExport(canvasRef);
     const {toasts,addToast}=useToast();
-    const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory();
+    const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory(dirtyRef);
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
         setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,
         roomLoaded,loadingRoom,roomVersion,setRoomVersion);
@@ -49,9 +49,9 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();
     const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
-    const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(user._id,color,addAction,sendAction);
+    const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(user._id,color,addAction,sendAction,dirtyRef);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
-        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id);
+        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id,dirtyRef);
 
     const handleUndo=()=>{
         if(!socketRef.current) return;
@@ -146,7 +146,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
 
     useEffect(()=>{
         if (!roomLoaded.current || loadingRoom.current) return;
-
+        if (!dirtyRef.current) return;
         const timer = setTimeout(() => {
             socketRef.current?.emit("persist-object", {
                 actions,
@@ -154,6 +154,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 redoHistory,
                 version: roomVersion
             });
+            dirtyRef.current = false;
         }, 300);
         return () => clearTimeout(timer);
     },[actions,history,redoHistory]);
