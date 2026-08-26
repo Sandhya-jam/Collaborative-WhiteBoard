@@ -29,7 +29,7 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
         });
 
         attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,redoRef,clearRef,
-            setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef);
+            setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef,pendingOperationRef);
         attachPresenceListeners(socket,setUsers,createPeerConnection,peerConnections,createOffer,createAnswer,remoteAudioRef,setMicStates);
         attachCursorListeners(socket,setRemoteCursors,reactionTimeouts);
         attachToastListeners(socket,addToast,peerConnections);
