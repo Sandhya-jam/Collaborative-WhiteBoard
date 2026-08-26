@@ -1,5 +1,5 @@
 export default function attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,
-    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion){
+    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef){
     socket.off("draw-action");
     socket.off("draw-start");
     socket.off("draw-move");
@@ -76,8 +76,8 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         setActions(actions);
         setHistory(history || []);
         setRedoHistory(redoHistory || []);
+        roomVersionRef.current = version;
         setRoomVersion(version);
-        console.log("After Update,ROOM VERSION:", roomVersion);
         roomLoaded.current = true;
 
         setTimeout(() => {
@@ -87,6 +87,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
 
     socket.on("persist-success",({version})=>{
         console.log("PERSIST SUCCESS, NEW VERSION:",version);
+        roomVersionRef.current = version;
         setRoomVersion(version);
     });
 

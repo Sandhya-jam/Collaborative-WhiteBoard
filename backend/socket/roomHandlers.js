@@ -44,12 +44,19 @@ export function registerRoomHandlers(socket,io){
         console.log(`User ${socket.id} joined room ${roomId}`);
   
         //send old room state
-        socket.emit("load-room",{
-            actions:room.actions,
-            history:room.history,
-            redoHistory:room.redoHistory,
-            version:room.version
-        });
+        if(version ===null || version === undefined || version <room.version){
+            if(version !== null && version !== undefined){
+                console.log("STALE VERSION, SENDING LATEST");
+            }   
+            socket.emit("load-room",{
+                actions:room.actions,
+                history:room.history,
+                redoHistory:room.redoHistory,
+                version:room.version
+            });
+        }else if(version===room.version){
+            console.log("UP TO DATE, NO LOAD");
+        }
     });
 
     socket.on("cursor-move",({x,y,userId,color,name,avatar})=>{

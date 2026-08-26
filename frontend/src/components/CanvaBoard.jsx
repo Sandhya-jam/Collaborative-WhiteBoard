@@ -35,6 +35,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [showVoicePanel, setShowVoicePanel] = useState(true);
     const [micStates, setMicStates] = useState({});
     const [roomVersion,setRoomVersion]=useState(null);
+    const roomVersionRef=useRef(null);
     const roomLoaded = useRef(false);
     const loadingRoom = useRef(true);
     const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket,setMicStates})
@@ -44,7 +45,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory(dirtyRef);
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
         setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,
-        roomLoaded,loadingRoom,roomVersion,setRoomVersion);
+        roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef);
     const profile=useProfile();
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();
@@ -133,14 +134,14 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     useEffect(() => {
         const joinRoom=()=>{
             if(!roomId||!socketRef.current) return;
-            console.log("JOINING WITH VERSION", roomVersion);
+            console.log("JOINING WITH VERSION", roomVersionRef.current);
             socketRef.current.emit("join-room",{
                 roomId,
                 userId:user?._id,
                 name:user?.name,
                 email:user?.email,
                 micOn:micOn,
-                version:roomVersion
+                version:roomVersionRef.current
             });
         };
         joinRoom();
@@ -149,7 +150,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
             socketRef.current?.off("connect",joinRoom);
         }
     }, [roomId,user?._id]);
-
+    
     useEffect(()=>{
         if (!roomLoaded.current || loadingRoom.current) return;
         if (!dirtyRef.current) return;
@@ -158,7 +159,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 actions,
                 history,
                 redoHistory,
-                version: roomVersion
+                version: roomVersionRef.current
             });
             dirtyRef.current = false;
         }, 300);
