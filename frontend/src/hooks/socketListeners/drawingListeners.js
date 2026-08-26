@@ -1,5 +1,6 @@
 export default function attachDrawingListeners(socket,addAction,setActions,setRemotePaths,undoRef,
-    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef){
+    redoRef,clearRef,setHistory,setRedoHistory,addModifyOperation,roomLoaded,loadingRoom,roomVersion,setRoomVersion,
+    roomVersionRef,pendingOperationRef){
     socket.off("draw-action");
     socket.off("draw-start");
     socket.off("draw-move");
@@ -79,7 +80,14 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         roomVersionRef.current = version;
         setRoomVersion(version);
         roomLoaded.current = true;
-
+        const pending=[...pendingOperationRef.current];
+        if(pending.length>0){
+            console.log("SENDING PENDING OPERATIONS:",pending.length);
+            pending.forEach((operation)=>{
+                socket.current?.emit("draw-end",{action:operation
+                });
+            })
+        }
         setTimeout(() => {
             loadingRoom.current = false;
         }, 0);

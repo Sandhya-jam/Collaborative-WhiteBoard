@@ -46,7 +46,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {actions,setActions,addAction,undo,redo,clearCanvas,history,setHistory,addModifyOperation,redoHistory,setRedoHistory}=useHistory(dirtyRef);
     const {socketRef,sendAction}=useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,setRemoteCursors,addToast,
         setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,
-        roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef);
+        roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef,pendingOperationRef);
     const profile=useProfile();
     const {sendCursor}=useCursor(socketRef,getUser()._id,profile);
     const user=getUser();

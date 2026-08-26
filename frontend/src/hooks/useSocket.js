@@ -8,7 +8,7 @@ import attachToastListeners from "./socketListeners/toastListeners";
 
 export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,clearCanvas,users,setUsers,
     setRemoteCursors,addToast,setHistory,setRedoHistory,addModifyOperation,createPeerConnection,peerConnections,
-    createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef){
+    createOffer,createAnswer,micOn,remoteAudioRef,setMicStates,roomLoaded,loadingRoom,roomVersion,setRoomVersion,roomVersionRef,pendingOperationRef){
     const clearRef=useRef();
     const undoRef=useRef();
     const redoRef=useRef();
