@@ -12,8 +12,9 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("draw-move",data);
     });
 
-    socket.on("draw-end",async(data)=>{//for pencil
-        socket.to(socket.roomId).emit("draw-end",data);
+    socket.on("draw-end",async({action})=>{//for pencil
+        console.log("Operation Received:",action.id,"user:",action.userId,"baseVersion:",action.baseVersion);
+        socket.to(socket.roomId).emit("draw-end",action);
     });
 
     socket.on("update-object",async({id,updates})=>{

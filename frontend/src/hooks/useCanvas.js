@@ -3,7 +3,7 @@ import {getUser} from "../utils/auth";
 import {hitTest} from "../utils/hitTest";
 
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
-    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef){
+    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef,roomVersionRef){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -258,7 +258,8 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             points: currentPath,
             color,
             width: brushSize,
-            userId:userId
+            userId:userId,
+            baseVersion:roomVersionRef.current,
         };
         dirtyRef.current = true;
         addAction(pencilAction);

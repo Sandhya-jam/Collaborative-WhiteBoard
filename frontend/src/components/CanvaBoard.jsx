@@ -52,7 +52,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(user._id,color,addAction,sendAction,dirtyRef);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
-        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id,dirtyRef);
+        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id,dirtyRef,roomVersionRef);
 
     const handleUndo=()=>{
         if(!socketRef.current) return;
