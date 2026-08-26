@@ -36,6 +36,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [micStates, setMicStates] = useState({});
     const [roomVersion,setRoomVersion]=useState(null);
     const roomVersionRef=useRef(null);
+    const pendingOperationRef=useRef([]);
     const roomLoaded = useRef(false);
     const loadingRoom = useRef(true);
     const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket,setMicStates})
@@ -52,7 +53,8 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const {selectedId, setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing} = useSelection();
     const{textInput,setTextInput,textPosition,startText,submitText}=useTextTool(user._id,color,addAction,sendAction,dirtyRef);
     const {startDrawing,draw,stopDrawing,currentPath,preview}=useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,
-        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id,dirtyRef,roomVersionRef);
+        setActions,selectedId,setSelectedId,dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,user._id,dirtyRef,
+        roomVersionRef,pendingOperationRef);
 
     const handleUndo=()=>{
         if(!socketRef.current) return;
@@ -159,7 +161,8 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
                 actions,
                 history,
                 redoHistory,
-                version: roomVersionRef.current
+                version: roomVersionRef.current,
+                //operation: pendingOperationRef.current
             });
             dirtyRef.current = false;
         }, 300);

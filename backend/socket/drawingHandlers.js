@@ -33,6 +33,7 @@ export function registerDrawingHandlers(socket){
 
     socket.on("persist-object",async({actions,history,redoHistory,version})=>{
         try{
+            //console.log("Persist operation:",operation?.id,"version:",version,"baseVersion:",operation?.baseVersion);
             const room=await Room.findOneAndUpdate(
                 {
                     roomId:socket.roomId,

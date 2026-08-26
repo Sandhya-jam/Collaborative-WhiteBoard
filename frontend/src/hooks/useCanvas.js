@@ -3,7 +3,7 @@ import {getUser} from "../utils/auth";
 import {hitTest} from "../utils/hitTest";
 
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
-    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef,roomVersionRef){
+    dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef,roomVersionRef,pendingOperationRef){
     const [drawing,setDrawing]=useState(false);
     const [currentPath,setCurrentPath]=useState([]);
     const [start,setStart]=useState(null);
@@ -263,7 +263,11 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         };
         dirtyRef.current = true;
         addAction(pencilAction);
-        if (!socketRef?.current) return;
+        if (!socketRef?.current?.connected){
+            pendingOperationRef.current.push(pencilAction);
+            console.log("Offline operation queued:",pencilAction.id);
+            return;
+        }
         console.log("DRAW END",pencilAction);
         socketRef.current.emit("draw-end", {
             action:pencilAction
