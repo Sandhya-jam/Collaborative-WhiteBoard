@@ -34,7 +34,7 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [showVoicePanel, setShowVoicePanel] = useState(true);
     const [micStates, setMicStates] = useState({});
-    const [roomVersion,setRoomVersion]=useState(1);
+    const [roomVersion,setRoomVersion]=useState(null);
     const roomLoaded = useRef(false);
     const loadingRoom = useRef(true);
     const {micOn,setMicOn,initializeAudio,toggleMic,createPeerConnection,peerConnections,createOffer,createAnswer,remoteStream}=audioAcess({socket,setMicStates})
@@ -131,18 +131,24 @@ const CanvaBoard = ({darkMode,setDarkMode,roomId}) => {
     },[darkMode,actions,currentPath,preview,remotePaths,tool,selectedId]);
     
     useEffect(() => {
-        const AudioPer=async()=>{
-            if(roomId && socketRef.current){
-                console.log("JOINING ROOM:",roomId);
-                const userId=user?._id;
-                const userName=user?.name;
-                const userEmail=user?.email;
-                await initializeAudio();
-                socketRef.current.emit("join-room", {roomId,userId,name:userName,email:userEmail,micOn:micOn});
-            }
+        const joinRoom=()=>{
+            if(!roomId||!socketRef.current) return;
+            console.log("JOINING WITH VERSION", roomVersion);
+            socketRef.current.emit("join-room",{
+                roomId,
+                userId:user?._id,
+                name:user?.name,
+                email:user?.email,
+                micOn:micOn,
+                version:roomVersion
+            });
+        };
+        joinRoom();
+        socketRef.current?.on("connect",joinRoom);
+        return ()=>{
+            socketRef.current?.off("connect",joinRoom);
         }
-        AudioPer();
-    }, [roomId]);
+    }, [roomId,user?._id]);
 
     useEffect(()=>{
         if (!roomLoaded.current || loadingRoom.current) return;

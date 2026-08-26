@@ -77,6 +77,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         setHistory(history || []);
         setRedoHistory(redoHistory || []);
         setRoomVersion(version);
+        console.log("After Update,ROOM VERSION:", roomVersion);
         roomLoaded.current = true;
 
         setTimeout(() => {

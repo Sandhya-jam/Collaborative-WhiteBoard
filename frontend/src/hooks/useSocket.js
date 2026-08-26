@@ -34,8 +34,8 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
         attachCursorListeners(socket,setRemoteCursors,reactionTimeouts);
         attachToastListeners(socket,addToast,peerConnections);
 
-        socket.on("disconnect", () => {
-            console.log("DISCONNECTED");
+        socket.on("disconnect", (reason) => {
+            console.log("DISCONNECTED", reason);
         });
         return()=>{
             console.log("CLEANING UP SOCKET LISTENERS");
