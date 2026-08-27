@@ -1,4 +1,4 @@
-export const createOperation = (type,userId,baseVersion,payload) => {
+export const createOperation = ({type,userId,baseVersion,payload}) => {
     return {
         operationId: crypto.randomUUID(),
         type,
