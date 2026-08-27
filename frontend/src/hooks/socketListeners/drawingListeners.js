@@ -84,7 +84,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         if(pending.length>0){
             console.log("SENDING PENDING OPERATIONS:",pending.length);
             pending.forEach((operation)=>{
-                socket.current?.emit("draw-end",{action:operation
+                socket.current?.emit("sync-operation",{operation
                 });
             })
         }

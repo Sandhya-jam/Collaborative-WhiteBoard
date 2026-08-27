@@ -17,6 +17,11 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("draw-end",{action});
     });
 
+    socket.on("sync-operation",async({operation})=>{
+        const room=await Room.findOne({roomId:socket.roomId});
+        console.log("Sync operation received:",operation.id,"baseVersion:",operation.baseVersion,"currentVersion:",room.version);
+    });
+    
     socket.on("update-object",async({id,updates})=>{
         console.log("SERVER RECEIVED",id,updates);
         socket.to(socket.roomId).emit("update-object",{id,updates});

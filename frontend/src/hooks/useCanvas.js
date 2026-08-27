@@ -1,7 +1,7 @@
 import { useState,useRef } from "react";
 import {getUser} from "../utils/auth";
 import {hitTest} from "../utils/hitTest";
-
+import { createOperation } from "../utils/operation";
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
     dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef,roomVersionRef,pendingOperationRef){
     const [drawing,setDrawing]=useState(false);
@@ -259,13 +259,13 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             color,
             width: brushSize,
             userId:userId,
-            baseVersion:roomVersionRef.current,
         };
         dirtyRef.current = true;
         addAction(pencilAction);
+        const operation=createOperation({type:"create",userId,baseVersion:roomVersionRef.current,payload:pencilAction});
         if (!socketRef?.current?.connected){
-            pendingOperationRef.current.push(pencilAction);
-            console.log("Offline operation queued:",pencilAction.id);
+            pendingOperationRef.current.push(operation);
+            console.log("Offline operation queued:",operation.operationId,"baseVersion:",operation.baseVersion);
             return;
         }
         console.log("DRAW END",pencilAction);
