@@ -260,14 +260,16 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             width: brushSize,
             userId:userId,
         };
-        dirtyRef.current = true;
-        addAction(pencilAction);
+        
         const operation=createOperation({type:"create",userId,baseVersion:roomVersionRef.current,payload:pencilAction});
         if (!socketRef?.current?.connected){
             pendingOperationRef.current.push(operation);
             console.log("Offline operation queued:",operation.operationId,"baseVersion:",operation.baseVersion);
+            addAction(pencilAction);
             return;
         }
+        dirtyRef.current = true;
+        addAction(pencilAction);
         console.log("DRAW END",pencilAction);
         socketRef.current.emit("draw-end", {
             action:pencilAction

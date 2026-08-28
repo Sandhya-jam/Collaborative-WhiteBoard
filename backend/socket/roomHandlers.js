@@ -57,6 +57,7 @@ export function registerRoomHandlers(socket,io){
         }else if(version===room.version){
             console.log("UP TO DATE, NO LOAD");
         }
+        socket.to(roomId).emit("room-sync-ready",{version:room.version});
     });
 
     socket.on("cursor-move",({x,y,userId,color,name,avatar})=>{

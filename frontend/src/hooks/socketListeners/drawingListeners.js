@@ -74,25 +74,40 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         console.log("ROOM VERSION:", version);
         loadingRoom.current = true;
 
-        setActions(actions);
+        const pending=[...pendingOperationRef.current];
+        const pendingCreateActions=pending.filter(op=>op.type==="create").map(op=>op.payload);
+        setActions([...actions,...pendingCreateActions]);
         setHistory(history || []);
         setRedoHistory(redoHistory || []);
         roomVersionRef.current = version;
         setRoomVersion(version);
         roomLoaded.current = true;
-        const pending=[...pendingOperationRef.current];
-        if(pending.length>0){
-            console.log("SENDING PENDING OPERATIONS:",pending.length);
-            pending.forEach((operation)=>{
-                socket.current?.emit("sync-operation",{operation
-                });
-            })
-        }
+        
         setTimeout(() => {
             loadingRoom.current = false;
         }, 0);
     });
 
+    socket.on("room-sync-ready",({version})=>{
+        console.log("room sync ready,version:",version);
+        roomVersionRef.current = version;
+        setRoomVersion(version);
+        const pending=[...pendingOperationRef.current];
+        if(pending.length==0){
+            console.log("NO PENDING OPERATIONS");
+            return;
+        }
+        console.log("SENDING PENDING OPERATIONS:",pending.length);
+        socket.emit("sync-operation",{operations:pending});
+    });
+
+    socket.on("operation-applied",({operationId,version})=>{
+        console.log("Operation applied:",operationId,"version:",version);
+        pendingOperationRef.current = pendingOperationRef.current.filter(op=>op.id!==operationId);
+        roomVersionRef.current = version;
+        setRoomVersion(version);
+    });
+    
     socket.on("persist-success",({version})=>{
         console.log("PERSIST SUCCESS, NEW VERSION:",version);
         roomVersionRef.current = version;
