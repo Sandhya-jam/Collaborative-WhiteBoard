@@ -27,14 +27,14 @@ export function registerDrawingHandlers(socket){
                 const action=operation.payload;
                 const alreadyExists=room.actions.some(a=>a.id===action.id);
                 if(alreadyExists){
-                    socket.to(socket.roomId).emit("operation-applied",{operationId:operation.id,version:room.version});
+                    socket.to(socket.roomId).emit("operation-applied",{operationId:operation.operationId,version:room.version});
                     return;
                 }
                 room.actions.push(action);
                 room.version+=1;
                 await room.save();
                 socket.to(socket.roomId).emit("draw-end",{action,version:room.version});
-                socket.to(socket.roomId).emit("operation-applied",{operationId:operation.id,version:room.version});
+                socket.to(socket.roomId).emit("operation-applied",{operationId:operation.operationId,version:room.version});
             }
         }catch(err){
             console.error("ERROR SYNCING OPERATIONS:",err);
