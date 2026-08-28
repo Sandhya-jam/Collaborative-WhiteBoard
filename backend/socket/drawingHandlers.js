@@ -12,9 +12,9 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("draw-move",data);
     });
 
-    socket.on("draw-end",async({action})=>{//for pencil
-        console.log("Operation Received:",action.id,"baseVersion:",action.baseVersion);
-        socket.to(socket.roomId).emit("draw-end",{action});
+    socket.on("draw-end",async({action,version})=>{//for pencil
+        console.log("Operation Received:",action.id,"version:",version);
+        socket.to(socket.roomId).emit("draw-end",{action,version});
     });
 
     socket.on("sync-operation",async({operations})=>{
@@ -33,7 +33,7 @@ export function registerDrawingHandlers(socket){
                 room.actions.push(action);
                 room.version+=1;
                 await room.save();
-                socket.to(socket.roomId).emit("draw-end",{action});
+                socket.to(socket.roomId).emit("draw-end",{action,version:room.version});
                 socket.to(socket.roomId).emit("operation-applied",{operationId:operation.id,version:room.version});
             }
         }catch(err){

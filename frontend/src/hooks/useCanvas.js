@@ -272,7 +272,8 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
         addAction(pencilAction);
         console.log("DRAW END",pencilAction);
         socketRef.current.emit("draw-end", {
-            action:pencilAction
+            action:pencilAction,
+            version:roomVersionRef.current,
         });
         }else if(preview){
             action={

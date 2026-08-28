@@ -45,9 +45,13 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
     });
 
     //END 
-    socket.on("draw-end",({action})=>{
-        console.log("DRAW END RECEIVED:", action);
+    socket.on("draw-end",({action,version})=>{
+        console.log("DRAW END RECEIVED:", action,"version",version);
         addAction(action);
+        if(version!==undefined){
+            roomVersionRef.current = version;
+            setRoomVersion(version);
+        }
         setRemotePaths((prev)=>{
             const newPaths={...prev};
             delete newPaths[action.userId];
@@ -107,7 +111,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         roomVersionRef.current = version;
         setRoomVersion(version);
     });
-    
+
     socket.on("persist-success",({version})=>{
         console.log("PERSIST SUCCESS, NEW VERSION:",version);
         roomVersionRef.current = version;
