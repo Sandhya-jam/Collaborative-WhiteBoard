@@ -107,7 +107,7 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
 
     socket.on("operation-applied",({operationId,version})=>{
         console.log("Operation applied:",operationId,"version:",version);
-        pendingOperationRef.current = pendingOperationRef.current.filter(op=>op.id!==operationId);
+        pendingOperationRef.current = pendingOperationRef.current.filter(op=>op.operationId!==operationId);
         roomVersionRef.current = version;
         setRoomVersion(version);
     });
