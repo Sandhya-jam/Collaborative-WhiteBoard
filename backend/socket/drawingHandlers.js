@@ -22,19 +22,19 @@ export function registerDrawingHandlers(socket){
             console.log("SYNC OPERATIONS RECEIVED:",operations.length);
             for(const operation of operations){
                 const room=await Room.findOne({roomId:socket.roomId});
-                if(!room) return;
-                if(operation.type!=="create") return;
+                if(!room) continue;
+                if(operation.type!=="create") continue;
                 const action=operation.payload;
                 const alreadyExists=room.actions.some(a=>a.id===action.id);
                 if(alreadyExists){
-                    socket.to(socket.roomId).emit("operation-applied",{operationId:operation.operationId,version:room.version});
-                    return;
+                    socket.emit("operation-applied",{operationId:operation.operationId,version:room.version});
+                    continue;
                 }
                 room.actions.push(action);
                 room.version+=1;
                 await room.save();
                 socket.to(socket.roomId).emit("draw-end",{action,version:room.version});
-                socket.to(socket.roomId).emit("operation-applied",{operationId:operation.operationId,version:room.version});
+                socket.emit("operation-applied",{operationId:operation.operationId,version:room.version});
             }
         }catch(err){
             console.error("ERROR SYNCING OPERATIONS:",err);
