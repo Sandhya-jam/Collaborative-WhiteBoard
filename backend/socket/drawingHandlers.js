@@ -46,11 +46,12 @@ export function registerDrawingHandlers(socket){
         socket.to(socket.roomId).emit("update-object",{id,updates});
     });
 
-    socket.on("modify-object",({before,after})=>{
+    socket.on("modify-object",({before,after,version})=>{
         socket.to(socket.roomId).emit("modify-object",
             {
                 before,
-                after
+                after,
+                version
             }
         );
     });

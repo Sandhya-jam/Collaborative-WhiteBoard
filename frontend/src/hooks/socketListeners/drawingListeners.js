@@ -147,8 +147,13 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
         setActions(prev=>prev.map(action=>action.id===id?{...action,...updates}:action));
     });
 
-    socket.on("modify-object",({before,after})=>{
-        console.log("Remote Modify",before.id);
+    socket.on("modify-object",({before,after,version})=>{
+        console.log("Remote Modify",before.id,"version:",version);
         addModifyOperation(before,after);
+
+        if(version!==undefined){    
+            roomVersionRef.current = version;
+            setRoomVersion(version);
+        }
     })
 };

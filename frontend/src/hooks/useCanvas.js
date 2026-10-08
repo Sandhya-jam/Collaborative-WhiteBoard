@@ -2,6 +2,7 @@ import { useState,useRef } from "react";
 import {getUser} from "../utils/auth";
 import {hitTest} from "../utils/hitTest";
 import { createOperation } from "../utils/operation";
+
 export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendAction,startText,actions,setActions,selectedId,setSelectedId,
     dragging,setDragging,dragOffset,setDragOffset,resizing,setResizing,addModifyOperation,CurruserId,dirtyRef,roomVersionRef,pendingOperationRef){
     const [drawing,setDrawing]=useState(false);
@@ -235,13 +236,32 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                 console.log("BEFORE REF", beforeEditRef.current);
                 console.log("AFTER REF", afterEditRef.current);
                 if(beforeEditRef.current && afterEditRef.current){
+                    const operation=createOperation({type:"modify",userId,baseVersion:roomVersionRef.current,
+                        payload:{before:structuredClone(beforeEditRef.current),after:structuredClone(afterEditRef.current)}});
+                        //OFFLINE
+                        if(!socketRef?.current?.connected){
+                        pendingOperationRef.current.push(operation);
+                        console.log("Offline operation queued:",operation.operationId,"baseVersion:",operation.baseVersion);
+                        addModifyOperation(
+                            beforeEditRef.current,
+                            afterEditRef.current
+                        );
+                        beforeEditRef.current=null;
+                        afterEditRef.current=null;
+                        setDragging(false);
+                        setResizing(false);
+                        return;
+                    }
+                    //ONLINE
+                    dirtyRef.current = true;
                     addModifyOperation(
                         beforeEditRef.current,
                         afterEditRef.current
                     );
                     socketRef.current?.emit("modify-object",{
                         before:beforeEditRef.current,
-                        after:afterEditRef.current
+                        after:afterEditRef.current,
+                        version:roomVersionRef.current
                     });
                     beforeEditRef.current=null;
                     afterEditRef.current=null;
