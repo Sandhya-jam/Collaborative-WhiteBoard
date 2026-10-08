@@ -11,10 +11,14 @@ export default function attachDrawingListeners(socket,addAction,setActions,setRe
     socket.off("load-room");
     socket.off("persist-success");
     socket.off("update-object");
-    socket.on("draw-action",(action)=>{
+    socket.on("draw-action",({action,version})=>{
         if(action.type!=="pencil"){
             addAction(action);
         }  
+        if(version!==undefined){
+            roomVersionRef.current = version;
+            setRoomVersion(version);
+        }
     })
     //START
     socket.on("draw-start",({userId,point,color,width})=>{

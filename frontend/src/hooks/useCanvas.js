@@ -281,6 +281,16 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
                 id:crypto.randomUUID(),
                 userId:userId
             };
+            const operation=createOperation({type:"create",userId,baseVersion:roomVersionRef.current,payload:action});
+            if(!socketRef?.current?.connected){
+                pendingOperationRef.current.push(operation);
+                console.log("Offline operation queued:",operation.operationId,"baseVersion:",operation.baseVersion);
+                addAction(action);
+                setCurrentPath([]);
+                setPreview(null);
+                setStart(null);
+                return;
+            }
         }
 
         if(action){
@@ -289,9 +299,6 @@ export default function useCanvas(addAction,color,brushSize,tool,socketRef,sendA
             //console.log("Sending action:", action)
             sendAction(action);//send to server
         }
-        setCurrentPath([]);
-        setPreview(null);
-        setStart(null);
   };
   return {startDrawing,draw,stopDrawing,currentPath,preview};
 }

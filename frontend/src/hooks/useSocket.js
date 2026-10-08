@@ -50,6 +50,8 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
             socket.off("clear-canvas");
             socket.off("load-room");
             socket.off("persist-success");
+            socket.off("room-sync-ready");
+            socket.off("operation-applied");
             socket.off("users-update");
             socket.off("cursor-move");
             socket.off("cursor-remove");
@@ -61,7 +63,10 @@ export default function useSocket(addAction,setActions,setRemotePaths,undo,redo,
     },[]);
 
     const sendAction=(action)=>{
-        socket.emit("draw-action",action);
+        socket.emit("draw-action",{
+            action,
+            version:roomVersionRef.current
+        });
     };
 
     return {

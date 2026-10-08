@@ -1,8 +1,8 @@
 import Room from "../models/Room.js";
 
 export function registerDrawingHandlers(socket){
-    socket.on("draw-action", async(action) => {//for shapes
-        socket.to(socket.roomId).emit("draw-action", action);
+    socket.on("draw-action", async({action,version}) => {//for shapes
+        socket.to(socket.roomId).emit("draw-action", {action,version});
     });
     socket.on("draw-start",(data)=>{
         socket.to(socket.roomId).emit("draw-start",data);
